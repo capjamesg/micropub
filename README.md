@@ -6,6 +6,8 @@ The client.py file contains all of the code for the Micropub client. micropub_he
 
 This application is powered by Python Flask.
 
+![Micropub homepage](screenshot.png)
+
 ## Specification Compliance
 
 This project is in development. As a result, the contents of this repository have not yet passed the Micropub client or server specifciations published on [micropub.rocks](https://micropub.rocks/).

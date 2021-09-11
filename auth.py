@@ -30,14 +30,14 @@ def micropub_callback(response):
         session["access_token"] = response.access_token
         session["me"] = response.me
         
-        try:
-            soup = BeautifulSoup(r.text, "html.parser")
-            mp_endpoint = soup.find("link", attrs={"rel": "micropub"})
-            r = requests.get(mp_endpoint["href"] + "?q=config", headers={"Authorization": "Bearer " + response.access_token})
-            session["config"] = r.json()
-            r = requests.get(mp_endpoint["href"] + "?q=syndicate-to", headers={"Authorization": "Bearer " + response.access_token})
-            session["syndication"] = r.json()
-        except:
-            pass
+        # try:
+        #     soup = BeautifulSoup(r.text, "html.parser")
+        #     mp_endpoint = soup.find("link", attrs={"rel": "micropub"})
+        #     r = requests.get(mp_endpoint["href"] + "?q=config", headers={"Authorization": "Bearer " + response.access_token})
+        #     session["config"] = r.json()
+        #     r = requests.get(mp_endpoint["href"] + "?q=syndicate-to", headers={"Authorization": "Bearer " + response.access_token})
+        #     session["syndication"] = r.json()
+        # except:
+        #     pass
 
     return redirect("/post")
