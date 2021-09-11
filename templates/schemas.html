@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    <h1>Micropub Endpoint Schemas</h1>
+
+    <p>This page lists all of the schemas for micropub endpoint requests made from this client.</p>
+
+    <h2>Reply</h2>
+
+    <h2>Note</h2>
+
+    <pre><code>
+[
+        {
+           "type":[
+              "h-entry"
+           ],
+           "properties":{
+              "post_name":"Coffee is great",
+              "content":[
+                 "Coffee is great - post content"
+              ],
+              "image_alt_text":"Micropub client",
+              "category":"Note",
+              "photo":"https://jamesg.blog/assets/bhUTQ13.jpg"
+           }
+        }
+]
+</code></pre>
+
+    <h2>Bookmark</h2>
+
+    <h2>Like</h2>
+
+    <code><pre>
+        {
+
+            "type":[
+         
+               "h-entry"
+         
+            ],
+         
+            "like-of":"https://indiebookclub.biz",
+         
+            "properties":{
+         
+               "post_name":"None",
+         
+               "content":[
+         
+                  "None"
+         
+               ],
+         
+               "image_alt_text":"None",
+         
+               "category":[
+         
+                  "Like"
+         
+               ]
+         
+            }
+         
+         }
+    </pre></code>
+
+    <h2>Drinking Post</h2>
+
+    <code><pre>
+        {
+
+            "type":[
+         
+               "h-entry"
+         
+            ],
+         
+            "drank":[
+         
+               {
+         
+                  "properties":{
+         
+                     "post_name":"I am drinking a Gesha from FCP",
+         
+                     "content":[
+         
+                        "I am drinking a delicious Tanzanian Gesha coffee from FCP."
+         
+                     ],
+         
+                     "image_alt_text":"",
+         
+                     "category":[
+         
+                        "Coffee"
+         
+                     ],
+         
+                     "coffee_info":{
+         
+                        "roaster":"Full Court Press",
+         
+                        "country":"Tanzania",
+         
+                        "process":"Natural"
+         
+                     }
+         
+                  }
+         
+               }
+         
+            ]
+         
+         }
+    </pre></code>
+
+    <h2>RSVP</h2>
+</section>
+{% endblock %}

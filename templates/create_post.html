@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+            <p class="error">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if post_type == "coffee" %}
+    <h1>Create a coffee post ☕</h1>
+    <p>Use the form below to share the coffee you are drinking on your personal website.</p>
+    <form action="/post" method="POST" enctype="multipart/form-data">
+        <label for="title">Post title:</label><br>
+        <input type="text" name="title" id="title" placeholder="I am drinking..." required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="20"></textarea><br>
+        <label for="photo">Post image (optional):</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        <label for="roaster">Roaster (optional):</label><br>
+        <input type="text" name="roaster" id="roaster" placeholder="Fortitude Coffee" /><br>
+        <label for="varietals">Varietal(s) (optional):</label><br>
+        <input type="text" name="varietals" id="varietals" placeholder="SL24, SL-28..." /><br>
+        <label for="country">Country (optional):</label><br>
+        <input type="text" name="country" id="country" placeholder="Kenya" /><br>
+        <label for="process">Process (optional):</label><br>
+        <input type="text" name="process" id="process" placeholder="Natural" /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Coffee" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="drank" id="drank" value="drank" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit post">
+    </form>
+    {% elif post_type == "note" %}
+    <h1>Create a note 📝</h1>
+    <p>Use the form below to create a note on your personal website.</p>
+    <form action="/post" method="POST" enctype="multipart/form-data">
+        <label for="title">Post title:</label><br>
+        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="20"></textarea><br>
+        <label for="photo">Post image (optional):</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        <label for="category">Post category:</label><br>
+        <input type="text" name="category" id="category" placeholder="Note, Coffee..." required /><br>
+        <label for="is_hidden">Should this note be hidden?</label><br>
+        <input type="radio" name="is_hidden" value="yes" checked>yes</input><br>
+        <input type="radio" name="is_hidden" value="no">no</input><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit post">
+    </form>
+    {% elif post_type == "checkin" %}
+    <h1>Create a checkin 🌍</h1>
+    <p>Use the form below to create a checkin on your personal website.</p>
+    <form action="/post" method="POST" enctype="multipart/form-data">
+        <label for="venue_name">Venue name:</label><br>
+        <input type="text" name="venue_name" id="venue_name" placeholder="Fortitude Coffee, York Place" required /><br>
+        <label for="latitude">Latitude:</label><br>
+        <input type="number" name="latitude" id="latitude" step="any" required /><br>
+        <label for="longitude">Longitude:</label><br>
+        <input type="number" name="longitude" id="longitude" step="any" required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15"></textarea><br>
+        <label for="photo">Post image (optional):</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        <label for="is_hidden">Should this checkin be hidden?</label><br>
+        <input type="radio" name="is_hidden" value="yes" checked>yes</input><br>
+        <input type="radio" name="is_hidden" value="no">no</input><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit checkin">
+    </form>
+    <script>
+        var x = document.getElementById("demo");
+        // run on load
+
+        function getLocation() {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+          } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+          }
+        }
+        document.onload = getLocation();
+        
+        function showPosition(position) {
+          var lat_field = document.getElementById("latitude");
+          var long_field = document.getElementById("longitude");
+          lat_field.value = position.coords.latitude;
+          long_field.value = position.coords.longitude;
+        }
+    </script>
+    {% elif post_type == "like" %}
+    <h1>Create a like ❤️</h1>
+    <p>Use the form below to send a like to a post.</p>
+    {% include "context.html" %}
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="like-of">URL of the post to which you want to send a like:</label><br>
+        <input type="text" name="like-of" id="like-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Like" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit like">
+    </form>
+    {% elif post_type == "repost" %}
+    <h1>Share a link 🔁</h1>
+    <p>Use the form below to share a link as a repost.</p>
+    {% include "context.html" %}
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="like-of">URL of the post to share as a repost:</label><br>
+        <input type="text" name="repost-of" id="repost-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Repost" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit repost">
+    </form>
+    {% elif post_type == "bookmark" %}
+    <h1>Create a bookmark 🔖</h1>
+    <p>Use the form below to send a bookmark to a post.</p>
+    {% include "context.html" %}
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="bookmark-of">URL of the post to bookmark:</label><br>
+        <input type="text" name="bookmark-of" id="bookmark-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Bookmark" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit bookmark">
+    </form>
+    {% elif post_type == "rsvp" %}
+    <h1>Create an RSVP 📅</h1>
+    <p>Use the form below to create an RSVP.</p>
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="event_name">Event to which you are RSVPing:</label><br>
+        <input type="text" name="event_name" id="event_name" placeholder="Manchester Coffee Festival" required /><br>
+        <label for="in-reply-to">Link to event (optional):</label><br>
+        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if url %}value="{{ url }}"{% endif %} /><br>
+        <label for="event_name">RSVP status:</label><br>
+        <select name="state" id="state">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="maybe">Maybe</option>
+        </select>
+        <br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15"></textarea><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="RSVP" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit RSVP">
+    </form>
+    {% else %}
+    <h1>Create a reply 💬</h1>
+    <p>Use the form below to create a reply to a post.</p>
+    {% include "context.html" %}
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="in-reply-to">URL of the post to which you want to reply:</label><br>
+        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <label for="content">Post contents:</label><br>
+        <textarea name="content" id="content" rows="20" required></textarea><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Webmention" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit reply">
+    </form>
+    {% endif %}
+</section>
+{% endblock %}

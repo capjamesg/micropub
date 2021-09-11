@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your user settings</h1>
+<section>
+    <h2>User information</h2>
+    <p>You are signed in as:</p>
+    <code><pre>{{ me.strip("/").replace("https://", "").replace("http://", "") }}</pre></code>
+    <p>Your access token is:</p>
+    <code><pre>{{ user }}</pre></code>
+    {% if syndication != None %}
+    <p>Your posts will be syndicated to:</p>
+    <ul>
+        {% for s in syndication["syndicate-to"] %}
+        <li><a href="{{ s['uid'] }}">{{ s["name"] }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</section>
+<section>
+    <h2>Schemas</h2>
+    <a href="/schemas">Click here to see the schemas posted by the client to the server.</a>
+</section>
+{% endblock %}

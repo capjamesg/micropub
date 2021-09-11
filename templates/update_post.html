@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+            <p class="error">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if post_type == "coffee" %}
+    <h1>Update a coffee post ☕</h1>
+    <p>Use the form below to update a coffee entry on your personal website.</p>
+    <form action="/update/?url={{ id }}" method="POST" enctype="multipart/form-data">
+        <label for="title">Post title:</label><br>
+        <input type="text" name="title" id="title" placeholder="I am drinking..." value="{{ properties.get('properties').get('title') }}" required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
+        <label for="roaster">Roaster (optional):</label><br>
+        <input type="text" name="roaster" id="roaster" placeholder="Fortitude Coffee" value="{{ properties.get('properties').get('coffee_info').get('roaster')[0] }}" /><br>
+        <label for="varietals">Varietal(s) (optional):</label><br>
+        <input type="text" name="varietals" id="varietals" placeholder="SL24, SL-28..." value="{{ properties.get('properties').get('coffee_info').get('varietals')[0] }}" /><br>
+        <label for="country">Country (optional):</label><br>
+        <input type="text" name="country" id="country" placeholder="Kenya" value="{{ properties.get('properties').get('coffee_info').get('country')[0] }}" /><br>
+        <label for="process">Process (optional):</label><br>
+        <input type="text" name="process" id="process" placeholder="Washed" value="{{ properties.get('properties').get('coffee_info').get('process')[0] }}" /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Coffee" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit post">
+    </form>
+    {% elif post_type == "note" %}
+    <h1>Update a note 📝</h1>
+    <p>Use the form below to update a note on your personal website.</p>
+    <form action="/update/?url={{ id }}" method="POST" enctype="multipart/form-data">
+        <label for="title">Post title:</label><br>
+        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" value="{{ properties.get('properties').get('title') }}" required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="20">{{ properties.get('properties').get('content')[0] }}</textarea><br>
+        <label for="photo">Post image (optional):</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        <label for="category">Post category:</label><br>
+        <input type="text" name="category" id="category" placeholder="Note, Coffee..." value="{% for c in properties.get('properties').get('category') %}{{ c }},{% endfor %}" /><br>
+        <label for="is_hidden">Should this note be hidden?</label><br>
+        <input type="radio" name="is_hidden" value="yes" {% if properties.get('properties').get('is_hidden') == "yes" %}checked{% endif %}>yes</input><br>
+        <input type="radio" name="is_hidden" value="no" {% if properties.get('properties').get('is_hidden') == "no" %}checked{% endif %}>no</input><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit post">
+    </form>
+    {% elif post_type == "checkin" %}
+    <h1>Create a checkin 🌍</h1>
+    <p>Use the form below to create a checkin on your personal website.</p>
+    <form action="/update/?url={{ id }}" method="POST" enctype="multipart/form-data">
+        <label for="venue_name">Venue name:</label><br>
+        <input type="text" name="venue_name" id="venue_name" value="{{ properties.get('name') }}" placeholder="Fortitude Coffee, York Place" required /><br>
+        <label for="latitude">Latitude:</label><br>
+        <input type="number" name="latitude" id="latitude" step="any" value="{{ properties.get('properties').get('latitude') }}" required /><br>
+        <label for="longitude">Longitude:</label><br>
+        <input type="number" name="longitude" id="longitude" step="any" value="{{ properties.get('properties').get('longitude') }}" required /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
+        <label for="photo">Post image (optional):</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        <label for="is_hidden">Should this checkin be hidden?</label><br>
+        <input type="radio" name="is_hidden" value="yes" {% if properties.get('properties').get('is_hidden') == "yes" %}checked{% endif %}>yes</input><br>
+        <input type="radio" name="is_hidden" value="no" {% if properties.get('properties').get('is_hidden') == "no" %}checked{% endif %}>no</input><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Update checkin">
+    </form>
+    {% elif post_type == "rsvp" %}
+    <h1>Update an RSVP 📅</h1>
+    <p>Use the form below to update the RSVP.</p>
+    <form action="/update/?url={{ id }}" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="event_name">Event to which you are RSVPing:</label><br>
+        <input type="text" name="event_name" id="event_name" placeholder="Manchester Coffee Festival" value="{{ properties.get('properties').get('event_name') }}" required /><br>
+        <label for="in-reply-to">Link to event (optional):</label><br>
+        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if url %}value="{{ properties.get('properties').get('in-reply-to') }}"{% endif %} /><br>
+        <label for="event_name">RSVP status:</label><br>
+        <select name="state" id="state">
+            <option value="yes" {% if properties.get('properties').get('p-rsvp') == "Yes" %}selected{% endif %}>Yes</option>
+            <option value="no" {% if properties.get('properties').get('p-rsvp') == "No" %}selected{% endif %}>No</option>
+            <option value="maybe" {% if properties.get('properties').get('p-rsvp') == "Maybe" %}selected{% endif %}>Maybe</option>
+        </select>
+        <br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="RSVP" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit RSVP">
+    </form>
+    {% else %}
+    <h1>Update a Reply 💬</h1>
+    <p>Use the form below to update a reply on your personal website.</p>
+    <form action="/update/?url={{ id }}" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="in-reply-to">URL of the post to which you want to reply:</label><br>
+        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" value="{{ properties.get('in-reply-to') }}" disabled /><br>
+        <label for="content">Post contents:</label><br>
+        <textarea name="content" id="content" rows="20" required>{{ properties.get('properties').get('content')[0] }}</textarea><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Webmention" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit post">
+    </form>
+    {% endif %}
+</section>
+{% endblock %}

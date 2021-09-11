@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>James' Micropub Endpoint</h1>
+<section>
+    {% if action == None %}
+    <p>Welcome to James' Micropub Endpoint.</p>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if user and action == None %}
+        <h2>Create posts</h2>
+        <p>You can:</p>
+        <ul>
+            <li><a href="/post">Reply to a post 💬</a></li>
+            <li><a href="/post?type=coffee">Create a drinking post ☕</a></li>
+            <li><a href="/post?type=like">Like a post ❤️</a></li>
+            <li><a href="/post?type=note">Create a note 📝</a></li>
+            <li><a href="/post?type=rsvp">Create an RSVP 📅</a></li>
+            <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
+            <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
+            <li><a href="/post?type=repost">Share a link 🔁</a></li>
+        </ul>
+        <h2>Update a post</h2>
+        <p>You can update a drinking post or reply you have already created.</p>
+        <form method="post" action="/">
+            <label for="url">URL of post to edit:</label><br>
+            <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
+            <input type="hidden" name="action" id="action" value="update" />
+            <input type="submit" value="Edit post">
+        </form>
+        <h2>Delete a post</h2>
+        <p>You can delete a drinking post, reply, or like.</p>
+        <form method="post" action="/">
+            <label for="url">URL of post to delete:</label><br>
+            <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
+            <input type="hidden" name="action" id="action" value="delete" />
+            <input type="submit" value="Delete post">
+        </form>
+        <h2>Undelete a post</h2>
+        <p>You can delete any post you have created.</p>
+        <form method="post" action="/">
+            <label for="url">URL of post to undelete:</label><br>
+            <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
+            <input type="hidden" name="action" id="action" value="undelete" />
+            <input type="submit" value="Undelete post">
+        </form>
+    {% elif user and action == "delete" %}
+        <p><a href="/">Click here to go back home.</a></p>
+    {% endif %}
+</section>
+{% endblock %}

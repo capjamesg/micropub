@@ -1,0 +1,26 @@
+{% if h_entry and h_entry.get("author_image") and h_entry.get('post_body') %}
+<hr>
+<section style="display: flex; flex-direction: row; flex-wrap: wrap; margin-top:10px; margin-bottom: 20px;">
+    <div class="u-author h-card" style="flex: 0 10%;">
+        <img src="{{ h_entry.get('author_image') }}" class="webmention-photo special-image" style="width: 40px;" alt="{{ h_entry.get('author_name') }} page icon">
+        <br />
+        {% if h_entry.get('author_name') %}
+        <a href="{{ h_entry.get('author_url') }}">{{ h_entry.get('author_name') }}</a>
+        {% endif %}
+    </div>
+    <div class="e-content webmention-content flex_right_home">
+        <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
+    </div>
+</section>
+<hr>
+{% elif h_entry and h_entry.get('post_body') %}
+<hr>
+<section style="margin-top:10px; margin-bottom: 20px;">
+    <p>{% if h_entry.get("p-name") %}{{ h_entry.get("p-name") }}{% endif %}</p>
+    <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
+    {% if h_entry.get('author_name') %}
+        <p>Written by <a href="{{ h_entry.get('author_url') }}" class="u-url p-name">{{ h_entry.get('author_name') }}</a></p>
+    {% endif %}
+</section>
+<hr>
+{% endif %}
