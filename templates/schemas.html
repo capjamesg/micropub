@@ -5,119 +5,362 @@
 
     <p>This page lists all of the schemas for micropub endpoint requests made from this client.</p>
 
+    <p>You can use these schemas to understand how the Micropub client sends requests to a server.</p>
+
+    <p>You may find these schemas especially helpful if you use this client but not the built-in server associated with this client.</p>
+
     <h2>Reply</h2>
+
+    <pre><code>
+
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "in-reply-to":[
+      
+            "https://jamesg.blog"
+      
+         ],
+      
+         "properties":{
+      
+            "content":[
+      
+               {
+      
+                  "html":"I love your blog!"
+      
+               }
+      
+            ],
+      
+            "category":[
+      
+               "Webmention"
+      
+            ]
+      
+         }
+      
+      }
+
+    </code></pre>
 
     <h2>Note</h2>
 
     <pre><code>
-[
-        {
-           "type":[
-              "h-entry"
-           ],
-           "properties":{
-              "post_name":"Coffee is great",
-              "content":[
-                 "Coffee is great - post content"
-              ],
-              "image_alt_text":"Micropub client",
-              "category":"Note",
-              "photo":"https://jamesg.blog/assets/bhUTQ13.jpg"
-           }
-        }
-]
-</code></pre>
 
-    <h2>Bookmark</h2>
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "properties":{
+      
+            "title":[
+      
+               "Micropub is a great way to post content on your site"
+      
+            ],
+      
+            "content":[
+      
+               {
+      
+                  "html":"The Micropub standard lets me post content to my site from my own client and any other client that is standard-compliant."
+      
+               }
+      
+            ],
+      
+            "category":[
+      
+               "IndieWeb"
+      
+            ],
+      
+            "is_hidden":[
+      
+               "no"
+      
+            ]
+      
+         }
+      
+      }
+
+    </code></pre>
 
     <h2>Like</h2>
 
-    <code><pre>
-        {
+    <pre><code>
 
-            "type":[
-         
-               "h-entry"
-         
-            ],
-         
-            "like-of":"https://indiebookclub.biz",
-         
-            "properties":{
-         
-               "post_name":"None",
-         
-               "content":[
-         
-                  "None"
-         
-               ],
-         
-               "image_alt_text":"None",
-         
-               "category":[
-         
-                  "Like"
-         
-               ]
-         
-            }
-         
+      {
+         "type":[
+            "h-entry"
+         ],
+         "like-of":[
+            "https://jamesg.blog"
+         ],
+         "properties":{
+            "category":[
+               "Like"
+            ]
          }
-    </pre></code>
+      }
+
+    </code></pre>
+
+    <h2>Bookmark</h2>
+
+    <pre><code>
+
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "bookmark-of":[
+      
+            "https://jamesg.blog/likes/"
+      
+         ],
+      
+         "properties":{
+      
+            "category":[
+      
+               "Bookmark"
+      
+            ]
+      
+         }
+      
+      }
+
+    </code></pre>
 
     <h2>Drinking Post</h2>
 
-    <code><pre>
-        {
+    <pre><code>
 
-            "type":[
-         
-               "h-entry"
-         
-            ],
-         
-            "drank":[
-         
-               {
-         
-                  "properties":{
-         
-                     "post_name":"I am drinking a Gesha from FCP",
-         
-                     "content":[
-         
-                        "I am drinking a delicious Tanzanian Gesha coffee from FCP."
-         
-                     ],
-         
-                     "image_alt_text":"",
-         
-                     "category":[
-         
-                        "Coffee"
-         
-                     ],
-         
-                     "coffee_info":{
-         
-                        "roaster":"Full Court Press",
-         
-                        "country":"Tanzania",
-         
-                        "process":"Natural"
-         
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "drank":[
+      
+            {
+      
+               "properties":{
+      
+                  "title":[
+      
+                     "I am drinking a Peruvian coffee from Steampunk Coffee"
+      
+                  ],
+      
+                  "content":[
+      
+                     {
+      
+                        "html":"With tasting notes of yellow fruit and honey, this coffee defied expectations!"
+      
                      }
-         
+      
+                  ],
+      
+                  "category":[
+      
+                     "Coffee"
+      
+                  ],
+      
+                  "coffee_info":{
+      
+                     "roaster":[
+      
+                        "Steampunk Coffee"
+      
+                     ],
+      
+                     "varietals":[
+      
+                        "Caturra"
+      
+                     ],
+      
+                     "country":[
+      
+                        "Peru"
+      
+                     ],
+      
+                     "process":[
+      
+                        "Washed"
+      
+                     ]
+      
                   }
-         
+      
                }
-         
-            ]
-         
-         }
-    </pre></code>
+      
+            }
+      
+         ]
+      
+      }
+
+    </code></pre>
 
     <h2>RSVP</h2>
+
+    <pre><code>
+
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "in-reply-to":[
+      
+            "https://indieweb.org"
+      
+         ],
+      
+         "p-rsvp":{
+      
+            "properties":{
+      
+               "event_name":"IndieWebCamp",
+      
+               "in-reply-to":"https://indieweb.org",
+      
+               "state":"yes",
+      
+               "content":[
+      
+                  "I am RSVPing to this event."
+      
+               ],
+      
+               "event_date":"2021-01-01",
+      
+               "event_time":"10:00"
+      
+            }
+      
+         }
+      
+      }
+
+    </code></pre>
+
+    <h2>Checkin</h2>
+
+    <pre><code>
+
+      {
+
+         "type":[
+      
+            "h-entry"
+      
+         ],
+      
+         "properties":{
+      
+            "checkin":[
+      
+               {
+      
+                  "properties":{
+      
+                     "name":[
+      
+                        "Fortitude Coffee, York Place"
+      
+                     ],
+      
+                     "latitude":[
+      
+                        "0.0"
+      
+                     ],
+      
+                     "longitude":[
+      
+                        "0.0"
+      
+                     ],
+      
+                     "content":[
+      
+                        "I went to Fortitude Coffee on York Place in Edinburgh."
+      
+                     ]
+      
+                  }
+      
+               }
+      
+            ],
+      
+            "photo":[
+      
+               {
+      
+                  "value":"https://jamesg.blog/assets/ABwuLIMG_78071.jpeg",
+      
+                  "alt":"Edinburgh city"
+      
+               }
+      
+            ]
+      
+         }
+      
+      }
+
+    </code></pre>
+
+    <h2>Repost</h2>
+
+    <pre><code>
+
+      {
+         "type":[
+            "h-entry"
+         ],
+         "repost-of":[
+            "https://boffosocko.com"
+         ],
+         "properties":{
+            "category":[
+               "Repost"
+            ]
+         }
+      }
+
+    </code></pre>
 </section>
 {% endblock %}

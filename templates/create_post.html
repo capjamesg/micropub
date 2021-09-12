@@ -155,6 +155,10 @@
             <option value="maybe">Maybe</option>
         </select>
         <br>
+        <label for="event_date">Event date (optional):</label><br>
+        <input type="date" name="event_date" id="event_date" placeholder="2018-01-01" /><br>
+        <label for="event_time">Event time (optional):</label><br>
+        <input type="time" name="event_time" id="event_time" placeholder="12:00" /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15"></textarea><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />

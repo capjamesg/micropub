@@ -6,6 +6,8 @@ The client.py file contains all of the code for the Micropub client. micropub_he
 
 This application is powered by Python Flask.
 
+## Screenshot
+
 ![Micropub homepage](screenshot.png)
 
 ## Specification Compliance
@@ -34,6 +36,41 @@ These values are all required for the endpoint to work. UPLOAD_FOLDER and HOME_F
 This project uses PyGitHub to upload posts published through the Micropub server to GitHub. For this feature to work, you need to specify a GitHub access token that has access to read and write to a repository.
 
 The Google API key is used for finding locations when you post a checkin. This feature is only implemented when one does not specify the address of where they are in a checkin. To disable this feature, go to the process_checkin() function in create_items.py and comment out the code related to the Google Cloud API.
+
+You will also need to create a folder for each post type you want to support. This is essential because the Micropub server does not create these folders automatically. The folders you need to create to support all post types are:
+
+    - _webmention
+    - _rsvp
+    - _repost
+    - _likes
+    - _notes
+    - _coffee
+    - _bookmark
+    - _checkin
+
+## Client Schemas
+
+The /schemas page shows schemas for every POST request the Micropub client can make (excluding media endpoint requests).
+
+You can refer to this page without downloading the client by going to templates/schemas.html in the source code.
+
+You can use these schemas to help understand the data the client will send to a server.
+
+Only JSON objects are documented on the schemas page. Support for form encoded requests is not yet stable and as a result has not been documented on the schemas page.
+
+## Server Role
+
+The role of the server is to turn the POST requests from the client into files that can then be uploaded to a Jekyll blog or any blog that uses similar front matter. You can modify the server to create a different page type. To do so, I would suggest taking a look at the write_to_file() function in create_items.py.
+
+Here is a webmention that the server created after receiving a "reply" POST request from the client:
+
+    category:
+    - Webmention
+    in-reply-to:
+    - https://jamesg.blog
+    layout: webmention
+    published: 2021-09-12 08:36:55.916905
+    title: Webmention to Home   James Coffee Blog
 
 ## Relevant Resources
 

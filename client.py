@@ -203,12 +203,14 @@ def create_post():
                     data["drank"][0]["properties"]["content"] = [{"html": request.form.get("content")}]
             elif request.form.get("category") == "RSVP":
                 data["p-rsvp"] = {}
-                data["p-rsvp"]["properties"] = {"event_name": request.form.get("event_name"), "in-reply-to": request.form.get("in-reply-to"), "state": request.form.get("state"), "content": [request.form.get("content")]}
+                data["p-rsvp"]["properties"] = {"event_name": request.form.get("event_name"), "in-reply-to": request.form.get("in-reply-to"), "state": request.form.get("state"), "content": [request.form.get("content")], "event_date": request.form.get("event_date"), "event_time": request.form.get("event_time")}
             elif request.form.get("venue_name"):
                 data["properties"] = {"checkin": [{"properties": {}}]}
                 data["properties"]["checkin"][0]["properties"]["name"] = [request.form.get("venue_name")]
                 data["properties"]["checkin"][0]["properties"]["latitude"] = [request.form.get("latitude")]
                 data["properties"]["checkin"][0]["properties"]["longitude"] = [request.form.get("longitude")]
+                if request.form.get("content"):
+                    data["properties"]["checkin"][0]["properties"]["content"] = [request.form.get("content")]
 
                 if not request.form.get("venue_name") or not request.form.get("latitude") or not request.form.get("longitude"):
                     flash("Please enter a valid venue name, latitude, and longitude value.")
@@ -225,7 +227,7 @@ def create_post():
                     data["properties"]["is_hidden"] = [request.form.get("is_hidden")]
                 if request.form.get("content") and BeautifulSoup(request.form.get("content"), "lxml") and BeautifulSoup(request.form.get("content"), "lxml").find():
                     data["properties"]["content"] = [{"html": request.form.get("content")}]
-                else:
+                elif request.form.get("content") and request.form.get("content") != None:
                     data["properties"]["content"] = [request.form.get("content")]
 
             if request.form.get("roaster"):
@@ -263,6 +265,8 @@ def create_post():
                     data["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
                 elif check_for_alt_text and request.form.get("image_alt_text") and request.form.get("drank"):
                     data["drank"][0]["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
+
+            print(data)
 
             if request.form.get("format") == "form_encoded":
                 form_encoded["h"] = "entry"

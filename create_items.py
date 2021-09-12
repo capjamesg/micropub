@@ -223,14 +223,16 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
     elif slug == None:
         slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(1, 9))
 
+    print(front_matter)
+
     with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "w+") as file:
         file.write("---\n")
         file.write(front_matter)
         file.write("---\n")
         file.write(content)
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+    # with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
+    #     repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)

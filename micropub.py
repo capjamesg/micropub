@@ -47,6 +47,9 @@ def micropub_endpoint():
         if object_type.get("access_token"):
             del object_type["access_token"]
 
+        if not object_type.get("properties"):
+            object_type["properties"] = {}
+
         if object_type.get("in-reply-to"):
             if type(object_type.get("in-reply-to")) == list:
                 object_type["properties"]["in-reply-to"] = object_type.get("in-reply-to")
@@ -86,6 +89,14 @@ def micropub_endpoint():
         elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == str:
             content = object_type["drank"][0]["properties"].get("content")[0]
             del object_type["drank"][0]["properties"]["content"]
+        elif object_type.get("properties") and object_type.get("properties").get("checkin") and object_type["properties"]["checkin"][0]["properties"].get("content") and type(object_type["properties"]["checkin"][0]["properties"].get("content")[0]) == dict:
+            content = object_type["properties"]["checkin"][0]["properties"].get("content")[0].get("html")
+            del object_type["properties"]["checkin"][0]["properties"]["content"]
+        elif object_type.get("properties") and object_type.get("properties").get("checkin") and object_type["properties"]["checkin"][0]["properties"].get("content") and type(object_type["properties"]["checkin"][0]["properties"].get("content")[0]) == str:
+            content = object_type["properties"]["checkin"][0]["properties"].get("content")[0]
+            del object_type["properties"]["checkin"][0]["properties"]["content"]
+        else:
+            content = ""
 
         content_to_remove = object_type.get("content")
 
