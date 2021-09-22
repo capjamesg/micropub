@@ -30,7 +30,6 @@ def process_like(repo, front_matter):
 
     if title_req.status_code == 200 and soup and soup.title and soup.title.string:
         title = soup.title.string
-        title = "".join([c for c in title if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
     else:
         title = target.replace("https://", "").replace("http://", "")
 
@@ -96,7 +95,6 @@ def process_bookmark(repo, front_matter):
 
     if title_req.status_code == 200 and soup and soup.title and soup.title.string:
         title = soup.title.string
-        title = "".join([c for c in title if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
     else:
         title = target.replace("https://", "").replace("http://", "")
 
@@ -122,7 +120,6 @@ def process_repost(repo, front_matter):
 
     if title_req.status_code == 200 and soup and soup.title and soup.title.string:
         title = soup.title.string
-        title = "".join([c for c in title if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
     else:
         title = target.replace("https://", "").replace("http://", "")
 
@@ -162,9 +159,8 @@ def process_reply(repo, front_matter, content):
 
     if title_req.status_code == 200 and soup and soup.title and soup.title.string:
         title = soup.title.string
-        title = "".join([c for c in title if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
     else:
-        title = json_content.get("in-reply-to")[0].replace("https://", "").replace("http://", "").replace("/", "-")
+        title = json_content.get("in-reply-to")[0].replace("https://", "").replace("http://", "")
 
     return write_to_file(front_matter, content, repo, "Webmention to {}".format(title), "_webmentions"), 201
 
@@ -217,13 +213,8 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
             json_content["sitemap"] = "true"
 
     front_matter = yaml.dump(json_content)
-
-    if slug == None and len(json_content["title"]) > 5:
-        slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(1, 9)) + "-" + "".join([c for c in json_content["title"].lower().split(" ")[:3]])
-    elif slug == None:
-        slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(1, 9))
-
-    print(front_matter)
+    
+    slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(100, 999))
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "w+") as file:
         file.write("---\n")
@@ -231,8 +222,8 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write("---\n")
         file.write(content)
 
-    # with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-    #     repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
+        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)
@@ -269,10 +260,10 @@ def undelete_post(repo, url):
     url = "".join([char for char in url if char.isalnum() or char == "-"]).lower()
     url = secure_filename(url)
 
-    contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo, get_contents=False)
+    contents, _, folder = micropub_helper.check_if_exists(url, repo, get_contents=False)
     
     if contents == None and folder == None:
-        return jsonify({"message": "Post not found."}), 404
+        return jsonify({"message": "The post you tried to undelete does not exist."}), 404
 
     repo.create_file(folder + "/" + url + ".md", "undelete post from micropub server", contents, branch="master")
 
@@ -291,13 +282,13 @@ def delete_post(repo, url):
     contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo)
     
     if contents == None and repo_file_contents == None and folder == None:
-        return jsonify({"message": "Post not found."}), 404
+        return jsonify({"message": "The post you tried to undelete does not exist."}), 404
 
     contents = repo.get_contents(folder + "/" + url + ".md")
     repo.delete_file(contents.path, "remove post via micropub", contents.sha, branch="master")
     return jsonify({"message": "Post deleted."}), 200
 
-def update_post(repo, url, front_matter):
+def update_post(repo, url, front_matter, full_contents_for_writing):
     repo = g.get_repo("capjamesg/jamesg.blog")
 
     original_url = url
@@ -333,6 +324,7 @@ def update_post(repo, url, front_matter):
     elif yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"):
         if type(yaml.load(front_matter, Loader=yaml.SafeLoader).get("add")) != list:
             return jsonify({"message": "This is not a valid add request."}), 400
+            
         user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["add"]
 
         for k, v in user_front_matter_to_json.items():
@@ -359,19 +351,15 @@ def update_post(repo, url, front_matter):
                 if item in yaml_to_json.keys():
                     yaml_to_json.pop(item)
 
-    if yaml.load(front_matter, Loader=yaml.SafeLoader).get("replace") and yaml.load(front_matter, Loader=yaml.SafeLoader).get("replace").get("content"):
-        if user_front_matter_to_json.get("content") and type(user_front_matter_to_json["content"][0]) == dict:
-            content = user_front_matter_to_json["content"][0]["html"]
-        else:
-            content = user_front_matter_to_json["content"][0]
-
     with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "w+") as file:
         file.write("---\n")
         file.write(yaml.dump(yaml_to_json))
-        file.write(" ".join([w for w in content[end_of_yaml:]]).strip())
+        file.write("---\n")
+        file.write(full_contents_for_writing)
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
-        repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
+        print(file.read())
+    #     repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
 
     resp = jsonify({"message": "Post updated."})
     resp.headers["Location"] = original_url
