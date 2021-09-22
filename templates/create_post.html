@@ -107,7 +107,7 @@
     {% include "context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="like-of">URL of the post to which you want to send a like:</label><br>
-        <input type="text" name="like-of" id="like-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="url" name="like-of" id="like-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Like" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -120,7 +120,7 @@
     {% include "context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="like-of">URL of the post to share as a repost:</label><br>
-        <input type="text" name="repost-of" id="repost-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="url" name="repost-of" id="repost-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Repost" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -133,7 +133,7 @@
     {% include "context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="bookmark-of">URL of the post to bookmark:</label><br>
-        <input type="text" name="bookmark-of" id="bookmark-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="url" name="bookmark-of" id="bookmark-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Bookmark" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -147,7 +147,7 @@
         <label for="event_name">Event to which you are RSVPing:</label><br>
         <input type="text" name="event_name" id="event_name" placeholder="Manchester Coffee Festival" required /><br>
         <label for="in-reply-to">Link to event (optional):</label><br>
-        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if url %}value="{{ url }}"{% endif %} /><br>
+        <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if url %}value="{{ url }}"{% endif %} /><br>
         <label for="event_name">RSVP status:</label><br>
         <select name="state" id="state">
             <option value="yes">Yes</option>
@@ -173,7 +173,7 @@
     {% include "context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="in-reply-to">URL of the post to which you want to reply:</label><br>
-        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
+        <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />

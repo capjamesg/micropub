@@ -356,7 +356,14 @@ def update_post():
 
             if post_type == "rsvp":
                 data["p-rsvp"] = {}
-                data["p-rsvp"]["properties"] = {"in-reply-to": properties["properties"]["in-reply-to"], "rsvp": request.form.get("rsvp"), "state": request.form.get("state"), "content": [request.form.get("content")]}
+                data["p-rsvp"]["properties"] = {
+                    "in-reply-to": properties["properties"]["in-reply-to"],
+                    "rsvp": request.form.get("rsvp"),
+                    "state": request.form.get("state"),
+                    "content": [request.form.get("content")],
+                    "event_date": request.form.get("event_date"),
+                    "event_time": request.form.get("event_time")
+                }
             elif request.form.get("in-reply-to"):
                 data["in-reply-to"] = request.form.get("in-reply-to")
 

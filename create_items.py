@@ -285,7 +285,9 @@ def delete_post(repo, url):
         return jsonify({"message": "The post you tried to undelete does not exist."}), 404
 
     contents = repo.get_contents(folder + "/" + url + ".md")
+    
     repo.delete_file(contents.path, "remove post via micropub", contents.sha, branch="master")
+
     return jsonify({"message": "Post deleted."}), 200
 
 def update_post(repo, url, front_matter, full_contents_for_writing):

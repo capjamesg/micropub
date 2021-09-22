@@ -138,7 +138,7 @@ def micropub_endpoint():
         elif action == "undelete":
             return create_items.undelete_post(repo, url)
         elif action == "update":
-            return create_items.update_post(repo, url, front_matter)
+            return create_items.update_post(repo, url, front_matter, content)
 
         if object_type.get("p-rsvp"):
             return create_items.process_rsvp(repo, front_matter, content)

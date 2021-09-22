@@ -35,7 +35,7 @@
     <p>Use the form below to update a note on your personal website.</p>
     <form action="/update/?url={{ id }}" method="POST" enctype="multipart/form-data">
         <label for="title">Post title:</label><br>
-        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" value="{{ properties.get('properties').get('title') }}" required /><br>
+        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" value="{{ properties.get('properties').get('title')[0] }}" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="20">{{ properties.get('properties').get('content')[0] }}</textarea><br>
         <label for="photo">Post image (optional):</label><br>
@@ -45,16 +45,16 @@
         <label for="category">Post category:</label><br>
         <input type="text" name="category" id="category" placeholder="Note, Coffee..." value="{% for c in properties.get('properties').get('category') %}{{ c }},{% endfor %}" /><br>
         <label for="is_hidden">Should this note be hidden?</label><br>
-        <input type="radio" name="is_hidden" value="yes" {% if properties.get('properties').get('is_hidden') == "yes" %}checked{% endif %}>yes</input><br>
-        <input type="radio" name="is_hidden" value="no" {% if properties.get('properties').get('is_hidden') == "no" %}checked{% endif %}>no</input><br>
+        <input type="radio" name="is_hidden" value="yes" {% if properties.get('properties').get('is_hidden')[0] == "yes" %}checked{% endif %}>yes</input><br>
+        <input type="radio" name="is_hidden" value="no" {% if properties.get('properties').get('is_hidden')[0] == "no" %}checked{% endif %}>no</input><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit post">
+        <input type="submit" value="Update note">
     </form>
     {% elif post_type == "checkin" %}
-    <h1>Create a checkin 🌍</h1>
-    <p>Use the form below to create a checkin on your personal website.</p>
+    <h1>Update a checkin 🌍</h1>
+    <p>Use the form below to update a checkin on your personal website.</p>
     <form action="/update/?url={{ id }}" method="POST" enctype="multipart/form-data">
         <label for="venue_name">Venue name:</label><br>
         <input type="text" name="venue_name" id="venue_name" value="{{ properties.get('name') }}" placeholder="Fortitude Coffee, York Place" required /><br>
@@ -83,7 +83,7 @@
         <label for="event_name">Event to which you are RSVPing:</label><br>
         <input type="text" name="event_name" id="event_name" placeholder="Manchester Coffee Festival" value="{{ properties.get('properties').get('event_name') }}" required /><br>
         <label for="in-reply-to">Link to event (optional):</label><br>
-        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if url %}value="{{ properties.get('properties').get('in-reply-to') }}"{% endif %} /><br>
+        <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://manchestercoffeefestival.com" {% if properties.get('properties').get('in-reply-to') %}value="{{ properties.get('properties').get('in-reply-to') }}"{% endif %} /><br>
         <label for="event_name">RSVP status:</label><br>
         <select name="state" id="state">
             <option value="yes" {% if properties.get('properties').get('p-rsvp') == "Yes" %}selected{% endif %}>Yes</option>
@@ -91,27 +91,31 @@
             <option value="maybe" {% if properties.get('properties').get('p-rsvp') == "Maybe" %}selected{% endif %}>Maybe</option>
         </select>
         <br>
+        <label for="event_date">Event date (optional):</label><br>
+        <input type="date" name="event_date" id="event_date" placeholder="2018-01-01" value="{{ properties.get('properties').get('event_date') }}" /><br>
+        <label for="event_time">Event time (optional):</label><br>
+        <input type="time" name="event_time" id="event_time" placeholder="12:00" value="{{ properties.get('properties').get('event_time') }}" /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="RSVP" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit RSVP">
+        <input type="submit" value="Update RSVP">
     </form>
     {% else %}
     <h1>Update a Reply 💬</h1>
     <p>Use the form below to update a reply on your personal website.</p>
     <form action="/update/?url={{ id }}" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="in-reply-to">URL of the post to which you want to reply:</label><br>
-        <input type="text" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" value="{{ properties.get('in-reply-to') }}" disabled /><br>
+        <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" value="{{ properties.get('in-reply-to')[0] }}" disabled /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required>{{ properties.get('properties').get('content')[0] }}</textarea><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit post">
+        <input type="submit" value="Update reply">
     </form>
     {% endif %}
 </section>
