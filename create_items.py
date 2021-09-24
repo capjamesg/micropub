@@ -17,8 +17,6 @@ g = Github(GITHUB_KEY)
 def process_like(repo, front_matter):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
-    json_content["layout"] = "like"
-
     target = json_content.get("like-of")[0]
 
     if not target:
@@ -82,8 +80,6 @@ def process_checkin(repo, front_matter, content):
 def process_bookmark(repo, front_matter):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
-    json_content["layout"] = "bookmark"
-
     target = json_content.get("bookmark-of")[0]
 
     if not target:
@@ -106,8 +102,6 @@ def process_bookmark(repo, front_matter):
 
 def process_repost(repo, front_matter):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    json_content["layout"] = "repost"
 
     target = json_content.get("repost-of")[0]
 
@@ -146,8 +140,6 @@ def process_rsvp(repo, front_matter, content):
 def process_reply(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
-    json_content["layout"] = "webmention"
-
     front_matter = yaml.dump(json_content)
 
     if not content or not json_content.get("in-reply-to"):
@@ -169,8 +161,6 @@ def process_post(repo, front_matter, content):
 
     categories = json_content.get("categories")
     post_name = json_content.get("title")
-
-    json_content["layout"] = "note"
 
     if categories == None or len(categories) == 0:
         categories = ["Note"]
@@ -198,6 +188,9 @@ def process_post(repo, front_matter, content):
 
 def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
+
+    if not json_content.get("layout"):
+        json_content["layout"] = "social_post"
 
     if post_name != None:
         json_content["title"] = post_name
@@ -235,8 +228,6 @@ def process_coffee_post(repo, front_matter, content):
 
     categories = json_content.get("categories")
     post_name = json_content.get("title")
-
-    json_content["layout"] = "drinking"
 
     if categories == None or len(categories) == 0:
         categories = ["Note"]
