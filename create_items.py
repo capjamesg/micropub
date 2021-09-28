@@ -245,7 +245,7 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
         print(file.read())
-    #     repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
+        repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
 
     resp = jsonify({"message": "Post updated."})
     resp.headers["Location"] = original_url
