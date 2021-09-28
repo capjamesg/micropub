@@ -35,7 +35,7 @@ def process_like(repo, front_matter):
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, "Liked {}".format(title), "_likes"), 201
+    return write_to_file(front_matter, content, repo, "Liked {}".format(title), "_likes", category="Like"), 201
 
 def process_checkin(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -75,7 +75,7 @@ def process_checkin(repo, front_matter, content):
     if not content:
         content = "Checked in to {}.".format(json_content.get("name")[0].replace(":", ""))
 
-    return write_to_file(front_matter, content, repo, "Checkin to {}".format(json_content.get("name")[0]), "_checkin", slug=slug), 201
+    return write_to_file(front_matter, content, repo, "Checkin to {}".format(json_content.get("name")[0]), "_checkin", slug=slug, category="Checkin"), 201
 
 def process_bookmark(repo, front_matter):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -98,7 +98,7 @@ def process_bookmark(repo, front_matter):
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, "Bookmarked {}".format(title), "_bookmark"), 201
+    return write_to_file(front_matter, content, repo, "Bookmarked {}".format(title), "_bookmark", category="Bookmark"), 201
 
 def process_repost(repo, front_matter):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -121,7 +121,7 @@ def process_repost(repo, front_matter):
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, "Shared {}".format(title), "_repost"), 201
+    return write_to_file(front_matter, content, repo, "Shared {}".format(title), "_repost", category="Repost"), 201
 
 def process_rsvp(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -135,7 +135,7 @@ def process_rsvp(repo, front_matter, content):
 
     title = "".join([c for c in json_content.get("event_name") if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
 
-    return write_to_file(front_matter, content, repo, "RSVP to {}".format(title), "_rsvp"), 201
+    return write_to_file(front_matter, content, repo, "RSVP to {}".format(title), "_rsvp", category="RSVP"), 201
 
 def process_reply(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -154,7 +154,7 @@ def process_reply(repo, front_matter, content):
     else:
         title = json_content.get("in-reply-to")[0].replace("https://", "").replace("http://", "")
 
-    return write_to_file(front_matter, content, repo, "Webmention to {}".format(title), "_webmentions"), 201
+    return write_to_file(front_matter, content, repo, "Webmention to {}".format(title), "_webmentions", category="Webmention"), 201
 
 def process_post(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -184,9 +184,9 @@ def process_post(repo, front_matter, content):
 
     os.remove(HOME_FOLDER + "random-{}.txt".format(random_sequence))
 
-    return write_to_file(front_matter, content, repo, post_name, "_notes"), 201
+    return write_to_file(front_matter, content, repo, post_name, "_notes", category=categories), 201
 
-def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None):
+def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None, category=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
     if not json_content.get("layout"):
@@ -199,11 +199,21 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
 
     json_content["published"] = datetime.datetime.now()
 
+    if category != None and type(category) == list:
+        json_content["category"] = category
+    elif category != None and type(category) == str:
+        json_content["category"] = [category]
+
     if json_content.get("is_hidden"):
         if json_content.get("is_hidden") == "yes":
             json_content["sitemap"] = "false"
         else:
             json_content["sitemap"] = "true"
+
+    if json_content.get("syndication") and json_content["syndication"][0] == "twitter":
+        del json_content["syndication"]
+
+        content = content + "\n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p> <a href='https://brid.gy/publish/twitter'></a>"
 
     front_matter = yaml.dump(json_content)
     
@@ -230,7 +240,7 @@ def process_coffee_post(repo, front_matter, content):
     post_name = json_content.get("title")
 
     if categories == None or len(categories) == 0:
-        categories = ["Note"]
+        categories = ["Coffee"]
 
     if post_name != None:
         json_content["title"] = "".join([char for char in post_name[0] if char.isalnum() or char == " "])
@@ -242,7 +252,7 @@ def process_coffee_post(repo, front_matter, content):
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, post_name, "_coffee"), 201
+    return write_to_file(front_matter, content, repo, post_name, "_coffee", category=categories), 201
 
 def undelete_post(repo, url):
     repo = g.get_repo("capjamesg/jamesg.blog")

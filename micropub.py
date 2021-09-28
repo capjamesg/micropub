@@ -70,6 +70,11 @@ def micropub_endpoint():
                 object_type["properties"]["bookmark-of"] = object_type.get("bookmark-of")
             else:
                 object_type["properties"]["bookmark-of"] = [object_type.get("bookmark-of")]
+        elif object_type.get("syndication"):
+            if type(object_type.get("syndication")) == list:
+                object_type["properties"]["syndication"] = object_type.get("syndication")
+            else:
+                object_type["properties"]["syndication"] = [object_type.get("syndication")]
 
         if object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == dict:
             content = object_type["properties"].get("content")[0].get("html")

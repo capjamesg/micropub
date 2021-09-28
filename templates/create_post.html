@@ -52,6 +52,11 @@
         <label for="is_hidden">Should this note be hidden?</label><br>
         <input type="radio" name="is_hidden" value="yes" checked>yes</input><br>
         <input type="radio" name="is_hidden" value="no">no</input><br>
+        <label for="syndication">Select a syndication platform below if you wish to publish your post elsewhere too.</label><br>
+        <select name="syndication" id="syndication">
+            <option value="none">None</option>
+            <option value="twitter">Twitter</option>
+        </select><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />

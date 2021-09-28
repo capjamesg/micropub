@@ -189,6 +189,9 @@ def create_post():
             if request.form.get("bookmark-of"):
                 data["bookmark-of"] = [request.form.get("bookmark-of")]
 
+            if request.form.get("syndication") and request.form.get("syndication") != "none":
+                data["syndication"] = [request.form.get("syndication")]
+
             # if roaster or varietals or country
             if request.form.get("drank"):
                 data["drank"] = [{
