@@ -129,8 +129,8 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write("---\n")
         file.write(content)
 
-    # with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-    #     repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
+        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)
