@@ -2,6 +2,7 @@ from flask import jsonify, request, session, g, Blueprint, abort
 from werkzeug.utils import secure_filename
 from .flask_indieauth import requires_indieauth
 from github import Github
+from .interactions import interactions
 from PIL import Image, ImageOps
 from . import create_items
 from .config import *
@@ -50,31 +51,15 @@ def micropub_endpoint():
         if not object_type.get("properties"):
             object_type["properties"] = {}
 
-        if object_type.get("in-reply-to"):
-            if type(object_type.get("in-reply-to")) == list:
-                object_type["properties"]["in-reply-to"] = object_type.get("in-reply-to")
-            else:
-                object_type["properties"]["in-reply-to"] = [object_type.get("in-reply-to")]
-        elif object_type.get("like-of"):
-            if type(object_type.get("like-of")) == list:
-                object_type["properties"]["like-of"] = object_type.get("like-of")
-            else:
-                object_type["properties"]["like-of"] = [object_type.get("like-of")]
-        elif object_type.get("repost-of"):
-            if type(object_type.get("repost-of")) == list:
-                object_type["properties"]["repost-of"] = object_type.get("repost-of")
-            else:
-                object_type["properties"]["repost-of"] = [object_type.get("repost-of")]
-        elif object_type.get("bookmark-of"):
-            if type(object_type.get("bookmark-of")) == list:
-                object_type["properties"]["bookmark-of"] = object_type.get("bookmark-of")
-            else:
-                object_type["properties"]["bookmark-of"] = [object_type.get("bookmark-of")]
-        elif object_type.get("syndication"):
-            if type(object_type.get("syndication")) == list:
-                object_type["properties"]["syndication"] = object_type.get("syndication")
-            else:
-                object_type["properties"]["syndication"] = [object_type.get("syndication")]
+        normalize_lists = ["in-reply-to", "like-of", "repost-of", "bookmark-of", "syndication"]
+
+        for item in normalize_lists:
+            if object_type.get(item) and type(object_type.get(item)) == list:
+                object_type["properties"][item] = object_type.get(item)
+            elif object_type.get(item) and type(object_type.get(item)) != list:
+                object_type["properties"][item] = [object_type.get(item)]
+    
+        root_properties = ["p-rsvp", "drank", "checkin"]
 
         if object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == dict:
             content = object_type["properties"].get("content")[0].get("html")
@@ -82,25 +67,16 @@ def micropub_endpoint():
         elif object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == str:
             content = object_type["properties"].get("content")[0]
             del object_type["properties"]["content"]
-        elif object_type.get("p-rsvp") and object_type["p-rsvp"]["properties"].get("content") and type(object_type["p-rsvp"]["properties"].get("content")[0]) == str:
-            content = object_type["p-rsvp"]["properties"].get("content")[0]
-            del object_type["p-rsvp"]["properties"]["content"]
-        elif object_type.get("p-rsvp") and object_type["p-rsvp"]["properties"].get("content") and type(object_type["p-rsvp"]["properties"].get("content")[0]) == dict:
-            content = object_type["p-rsvp"]["properties"].get("content")[0].get("html")
-            del object_type["p-rsvp"]["properties"]["content"]
-        elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
-            content = object_type["drank"][0]["properties"].get("content")[0].get("html")
-            del object_type["drank"][0]["properties"]["content"]
-        elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == str:
-            content = object_type["drank"][0]["properties"].get("content")[0]
-            del object_type["drank"][0]["properties"]["content"]
-        elif object_type.get("properties") and object_type.get("properties").get("checkin") and object_type["properties"]["checkin"][0]["properties"].get("content") and type(object_type["properties"]["checkin"][0]["properties"].get("content")[0]) == dict:
-            content = object_type["properties"]["checkin"][0]["properties"].get("content")[0].get("html")
-            del object_type["properties"]["checkin"][0]["properties"]["content"]
-        elif object_type.get("properties") and object_type.get("properties").get("checkin") and object_type["properties"]["checkin"][0]["properties"].get("content") and type(object_type["properties"]["checkin"][0]["properties"].get("content")[0]) == str:
-            content = object_type["properties"]["checkin"][0]["properties"].get("content")[0]
-            del object_type["properties"]["checkin"][0]["properties"]["content"]
-        else:
+
+        for root_property in root_properties:
+            if object_type.get(root_property) and object_type[root_property]["properties"].get("content") and type(object_type[root_property]["properties"].get("content")[0]) == str:
+                content = object_type[root_property]["properties"].get("content")[0]
+                del object_type[root_property]["properties"]["content"]
+            elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
+                content = object_type[root_property]["properties"].get("content")[0].get("html")
+                del object_type[root_property]["properties"]["content"]
+
+        if not content:
             content = ""
 
         content_to_remove = object_type.get("content")
@@ -144,25 +120,22 @@ def micropub_endpoint():
             return create_items.undelete_post(repo, url)
         elif action == "update":
             return create_items.update_post(repo, url, front_matter, content)
-
         if object_type.get("p-rsvp"):
-            return create_items.process_rsvp(repo, front_matter, content)
+            return create_items.process_social(repo, front_matter, interactions.get("rsvp"))
         elif object_type.get("in-reply-to"):
-            return create_items.process_reply(repo, front_matter, content)
+            return create_items.process_social(repo, front_matter, interactions.get("webmention"), content)
         elif object_type.get("like-of"):
-            return create_items.process_like(repo, front_matter)
+            return create_items.process_social(repo, front_matter, interactions.get("like"))
         elif object_type.get("repost-of"):
-            return create_items.process_repost(repo, front_matter)
+            return create_items.process_social(repo, front_matter, interactions.get("repost"))
         elif object_type.get("bookmark-of"):
-            return create_items.process_bookmark(repo, front_matter)
+            return create_items.process_social(repo, front_matter, interactions.get("bookmark"))
         elif object_type.get("properties") and object_type.get("properties").get("checkin"):
             return create_items.process_checkin(repo, front_matter, content)
         if object_type.get("drank"):
-            return create_items.process_coffee_post(repo, front_matter, content)
+            return create_items.process_social(repo, front_matter, interactions.get("coffee"), content)
         elif post_type == "entry":
-            return create_items.process_post(repo, front_matter, content)
-        elif post_type != "entry" and post_type != "in-reply-to":
-            return jsonify({"message": "Only h-entry or in-reply-to posts are accepted."}), 400
+            return create_items.process_post(repo, front_matter, interactions.get("note"), content)
         else:
             return jsonify({"message": "Invalid post type."}), 400
 

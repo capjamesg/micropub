@@ -14,13 +14,15 @@ import os
 
 g = Github(GITHUB_KEY)
 
-def process_like(repo, front_matter):
+def process_social(repo, front_matter, interaction, content=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
-    target = json_content.get("like-of")[0]
+    json_content["layout"] = interaction.get("layout")
+
+    target = json_content.get(interaction.get("attribute"))[0]
 
     if not target:
-        return jsonify({"message": "Please enter a like-of target."}), 400
+        return jsonify({"message": "Please enter a {} target.".format(interaction.get("attribute"))}), 400
 
     title_req = requests.get(target)
 
@@ -31,11 +33,27 @@ def process_like(repo, front_matter):
     else:
         title = target.replace("https://", "").replace("http://", "")
 
-    content = "I liked <a href='{}' class='u-like-of'>{}</a> by <a href='{}'>{}</a>.".format(target, title, target.split("://")[1].split("/")[0], target.split("://")[1].split("/")[0])
+    if content == None:
+        content = "I {} <a href='{}' class='u-{}'>{}</a> by <a href='{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title, target.split("://")[1].split("/")[0], target.split("://")[1].split("/")[0])
+        title = "{} {}".format(interaction.get("keyword").title(), title)
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, "Liked {}".format(title), "_likes", category="Like"), 201
+    random_sequence = "".join(random.sample(string.ascii_letters, 3))
+
+    with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "w+") as f:
+        f.write(content)
+    
+    if "<pre lang='python'>" in content:
+        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
+            content = colors.get_rendered_html(f.read(), "python")
+    elif "<pre lang='bash'>" in content:
+        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
+            content = colors.get_rendered_html(f.read(), "bash")
+
+    os.remove(HOME_FOLDER + "random-{}.txt".format(random_sequence))
+
+    return write_to_file(front_matter, content, repo, title, interaction.get("folder"), category=interaction.get("category")), 201
 
 def process_checkin(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -77,125 +95,11 @@ def process_checkin(repo, front_matter, content):
 
     return write_to_file(front_matter, content, repo, "Checkin to {}".format(json_content.get("name")[0]), "_checkin", slug=slug, category="Checkin"), 201
 
-def process_bookmark(repo, front_matter):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    target = json_content.get("bookmark-of")[0]
-
-    if not target:
-        return jsonify({"message": "Please enter a bookmark-of target."}), 400
-
-    title_req = requests.get(target)
-
-    soup = BeautifulSoup(title_req.text, "html.parser")
-
-    if title_req.status_code == 200 and soup and soup.title and soup.title.string:
-        title = soup.title.string
-    else:
-        title = target.replace("https://", "").replace("http://", "")
-
-    content = "I have bookmarked <a href='{}' class='u-bookmark-of h-cite'>{}</a> by <a href='{}'>{}</a> for later reference.".format(target, title, target.split("://")[1].split("/")[0], target.split("://")[1].split("/")[0])
-
-    front_matter = yaml.dump(json_content)
-
-    return write_to_file(front_matter, content, repo, "Bookmarked {}".format(title), "_bookmark", category="Bookmark"), 201
-
-def process_repost(repo, front_matter):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    target = json_content.get("repost-of")[0]
-
-    if not target:
-        return jsonify({"message": "Please enter a repost-of target."}), 400
-
-    title_req = requests.get(target)
-
-    soup = BeautifulSoup(title_req.text, "html.parser")
-
-    if title_req.status_code == 200 and soup and soup.title and soup.title.string:
-        title = soup.title.string
-    else:
-        title = target.replace("https://", "").replace("http://", "")
-
-    content = "I enjoyed <a href='{}' class='u-repost-of h-cite'>{}</a> by <a href='{}'>{}</a>.".format(target, title, target.split("://")[1].split("/")[0], target.split("://")[1].split("/")[0])
-
-    front_matter = yaml.dump(json_content)
-
-    return write_to_file(front_matter, content, repo, "Shared {}".format(title), "_repost", category="Repost"), 201
-
-def process_rsvp(repo, front_matter, content):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    json_content["layout"] = "rsvp"
-
-    if not content or not json_content.get("event_name") or not json_content.get("state"):
-        return jsonify({"message": "Please enter an event name, an RSVP state, and a post body."}), 400
-
-    front_matter = yaml.dump(json_content)
-
-    title = "".join([c for c in json_content.get("event_name") if c.isalpha() or c.isdigit() or c == " " or c == "-" or c == "_"])
-
-    return write_to_file(front_matter, content, repo, "RSVP to {}".format(title), "_rsvp", category="RSVP"), 201
-
-def process_reply(repo, front_matter, content):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    front_matter = yaml.dump(json_content)
-
-    if not content or not json_content.get("in-reply-to"):
-        return jsonify({"message": "Please enter post content and an in-reply-to target."}), 400
-
-    title_req = requests.get(json_content.get("in-reply-to")[0])
-
-    soup = BeautifulSoup(title_req.text, "lxml")
-
-    if title_req.status_code == 200 and soup and soup.title and soup.title.string:
-        title = soup.title.string
-    else:
-        title = json_content.get("in-reply-to")[0].replace("https://", "").replace("http://", "")
-
-    return write_to_file(front_matter, content, repo, "Webmention to {}".format(title), "_webmentions", category="Webmention"), 201
-
-def process_post(repo, front_matter, content):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    categories = json_content.get("categories")
-    post_name = json_content.get("title")
-
-    if categories == None or len(categories) == 0:
-        categories = ["Note"]
-
-    front_matter = yaml.dump(json_content)
-
-    if not content:
-        return jsonify({"message": "Please specify a post type and content body."}), 400
-
-    random_sequence = "".join(random.sample(string.ascii_letters, 3))
-
-    with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "w+") as f:
-        f.write(content)
-    
-    if "<pre lang='python'>" in content:
-        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
-            content = colors.get_rendered_html(f.read(), "python")
-    elif "<pre lang='bash'>" in content:
-        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
-            content = colors.get_rendered_html(f.read(), "bash")
-
-    os.remove(HOME_FOLDER + "random-{}.txt".format(random_sequence))
-
-    return write_to_file(front_matter, content, repo, post_name, "_notes", category=categories), 201
-
 def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None, category=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
     if not json_content.get("layout"):
         json_content["layout"] = "social_post"
-
-    if post_name != None:
-        json_content["title"] = post_name
-    else:
-        json_content["title"] = " ".join(content.split(" ")[:8]) + " ..."
 
     json_content["published"] = datetime.datetime.now()
 
@@ -225,34 +129,13 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write("---\n")
         file.write(content)
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+    # with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
+    #     repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)
 
     return resp
-
-def process_coffee_post(repo, front_matter, content):
-    json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
-
-    categories = json_content.get("categories")
-    post_name = json_content.get("title")
-
-    if categories == None or len(categories) == 0:
-        categories = ["Coffee"]
-
-    if post_name != None:
-        json_content["title"] = "".join([char for char in post_name[0] if char.isalnum() or char == " "])
-    else:
-        json_content["title"] = content.split(" ")[:3][0]
-
-    if not content:
-        return jsonify({"message": "Please specify a post type and content body."}), 400
-
-    front_matter = yaml.dump(json_content)
-
-    return write_to_file(front_matter, content, repo, post_name, "_coffee", category=categories), 201
 
 def undelete_post(repo, url):
     repo = g.get_repo("capjamesg/jamesg.blog")
