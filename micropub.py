@@ -61,6 +61,8 @@ def micropub_endpoint():
     
         root_properties = ["p-rsvp", "drank", "checkin"]
 
+        content = ""
+
         if object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == dict:
             content = object_type["properties"].get("content")[0].get("html")
             del object_type["properties"]["content"]
@@ -75,9 +77,6 @@ def micropub_endpoint():
             elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
                 content = object_type[root_property]["properties"].get("content")[0].get("html")
                 del object_type[root_property]["properties"]["content"]
-
-        if not content:
-            content = ""
 
         content_to_remove = object_type.get("content")
 

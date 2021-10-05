@@ -117,7 +117,10 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
     if json_content.get("syndication") and json_content["syndication"][0] == "twitter":
         del json_content["syndication"]
 
-        content = content + "\n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p> <a href='https://brid.gy/publish/twitter'></a>"
+        content = content + "\n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p> <a href='https://brid.gy/publish/twitter'></a>"\
+        
+    json_content["posted_using"] = "my Micropub server."
+    json_content["posted_using_url"] = "https://github.com/capjamesg/micropub"
 
     front_matter = yaml.dump(json_content)
     
