@@ -83,6 +83,14 @@ def create_post():
     if request.args.get("like-of") or request.args.get("in-reply-to") or request.args.get("repost-of") or request.args.get("bookmark") and (url.startswith("https://") or url.startswith("http://")):
         parsed = mf2py.parse(requests.get(url).text)
 
+        site_supports_webmention = False
+
+        supports_webmention = requests.get("https://webmention.jamesg.blog/discover?url={}".format(url))
+
+        if supports_webmention.status_code == 200:
+            if supports_webmention.json()["success"] == True:
+                site_supports_webmention = True
+
         domain = url.replace("https://", "").replace("http://", "").split("/")[0]
 
         if parsed["items"] and parsed["items"][0]["type"] == "h-entry":
@@ -299,7 +307,7 @@ def create_post():
         else:
             return jsonify({"error": "You must be logged in to create a post."}), 401
 
-    return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me, url=url, h_entry=h_entry)
+    return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me, url=url, h_entry=h_entry, site_supports_webmention=site_supports_webmention)
 
 @client.route("/update/", methods=["GET", "POST"])
 def update_post():

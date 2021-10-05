@@ -34,7 +34,7 @@ def process_social(repo, front_matter, interaction, content=None):
         title = target.replace("https://", "").replace("http://", "")
 
     if content == None:
-        content = "I {} <a href='{}' class='u-{}'>{}</a> by <a href='{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title, target.split("://")[1].split("/")[0], target.split("://")[1].split("/")[0])
+        content = "I {} <a href='{}' class='u-{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title)
         title = "{} {}".format(interaction.get("keyword").title(), title)
 
     front_matter = yaml.dump(json_content)
