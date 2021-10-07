@@ -80,10 +80,10 @@ def create_post():
         title = "Create a Reply"
         url = request.args.get("in-reply-to")
 
+    site_supports_webmention = False
+
     if request.args.get("like-of") or request.args.get("in-reply-to") or request.args.get("repost-of") or request.args.get("bookmark") and (url.startswith("https://") or url.startswith("http://")):
         parsed = mf2py.parse(requests.get(url).text)
-
-        site_supports_webmention = False
 
         supports_webmention = requests.get("https://webmention.jamesg.blog/discover?url={}".format(url))
 

@@ -29,7 +29,7 @@ def process_social(repo, front_matter, interaction, content=None):
     soup = BeautifulSoup(title_req.text, "lxml")
 
     if title_req.status_code == 200 and soup and soup.title and soup.title.string:
-        title = soup.title.string
+        title = soup.title.string.strip().replace("\n", "")
     else:
         title = target.replace("https://", "").replace("http://", "")
 
@@ -119,7 +119,7 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
 
         content = content + "\n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p> <a href='https://brid.gy/publish/twitter'></a>"\
         
-    json_content["posted_using"] = "my Micropub server."
+    json_content["posted_using"] = "my Micropub server"
     json_content["posted_using_url"] = "https://github.com/capjamesg/micropub"
 
     front_matter = yaml.dump(json_content)
