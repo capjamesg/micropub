@@ -28,7 +28,7 @@ interactions = {
         "layout": "social_post"
     },
     "rsvp": {
-        "attribute": "rsvp",
+        "attribute": "p-rsvp",
         "keyword": "rsvped",
         "folder": "_rsvps",
         "category": "RSVP",
