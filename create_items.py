@@ -58,7 +58,7 @@ def process_social(repo, front_matter, interaction, content=None):
 def process_checkin(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
-    json_content["layout"] = "checkin"
+    json_content["layout"] = "social_post"
 
     if not json_content.get("name")[0] or not json_content.get("latitude") or not json_content.get("longitude"):
         return jsonify({"message": "Please enter a venue name, latitude, and longitude."}), 400
@@ -107,6 +107,9 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         json_content["category"] = category
     elif category != None and type(category) == str:
         json_content["category"] = [category]
+
+    if post_name:
+        json_content["title"] = post_name
 
     if json_content.get("is_hidden"):
         if json_content.get("is_hidden") == "yes":
