@@ -75,17 +75,19 @@ def discover_auth_endpoint():
 
     soup = BeautifulSoup(r.text, "html.parser")
 
-    auth_endpoint = soup.find("link", rel="authorization_endpoint")
+    token_endpoint = soup.find("link", rel="authorization_endpoint")
 
-    if auth_endpoint is None:
+    if token_endpoint is None:
         flash("An IndieAuth endpoint could not be found on your website.")
         return redirect("/login")
 
-    if not auth_endpoint.get("href").startswith("https://") and not auth_endpoint.get("href").startswith("http://"):
+    if not token_endpoint.get("href").startswith("https://") and not token_endpoint.get("href").startswith("http://"):
         flash("Your IndieAuth endpoint published on your site must be a full HTTP URL.")
         return redirect("/login")
 
-    auth_endpoint = auth_endpoint["href"]
+    token_endpoint = token_endpoint["href"]
+
+    session["token_endpoint"] = token_endpoint
 
     random_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
