@@ -1,6 +1,6 @@
 from flask import jsonify, request, redirect, session, Blueprint, current_app, flash, render_template
 from .flask_indieauth import requires_indieauth
-from .config import ME, TOKEN_ENDPOINT, CALLBACK_URL, CLIENT_ID, ENDPOINT_URL
+from .config import ME, CALLBACK_URL, CLIENT_ID
 from bs4 import BeautifulSoup
 import requests
 import random
@@ -31,7 +31,7 @@ def indieauth_callback():
         "Accept": "application/json"
     }
 
-    r = requests.post(TOKEN_ENDPOINT, data=data, headers=headers)
+    r = requests.post(session.get("token_endpoint"), data=data, headers=headers)
     
     if r.status_code != 200:
         flash("There was an error with your token endpoint server.")
@@ -67,8 +67,26 @@ def logout():
 
     return redirect("/home")
 
-@auth.route("/login", methods=["GET", "POST"])
-def login():
+@auth.route("/discover", methods=["POST"])
+def discover_auth_endpoint():
+    domain = request.form.get("me")
+
+    r = requests.get(domain)
+
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    auth_endpoint = soup.find("link", rel="authorization_endpoint")
+
+    if auth_endpoint is None:
+        flash("An IndieAuth endpoint could not be found on your website.")
+        return redirect("/login")
+
+    if not auth_endpoint.get("href").startswith("https://") and not auth_endpoint.get("href").startswith("http://"):
+        flash("Your IndieAuth endpoint published on your site must be a full HTTP URL.")
+        return redirect("/login")
+
+    auth_endpoint = auth_endpoint["href"]
+
     random_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
     session["code_verifier"] = random_code
@@ -81,4 +99,8 @@ def login():
 
     session["state"] = state
 
-    return render_template("auth.html", title="Webmention Dashboard Login", code_challenge=code_challenge, state=state)
+    return redirect(auth_endpoint + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
+
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+    return render_template("auth.html", title="Micropub Dashboard Login")
