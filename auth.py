@@ -101,7 +101,7 @@ def discover_auth_endpoint():
 
     session["state"] = state
 
-    return redirect(auth_endpoint + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=create update delete media undelete profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
+    return redirect(token_endpoint + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=create update delete media undelete profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
