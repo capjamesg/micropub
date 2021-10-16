@@ -46,13 +46,15 @@ def indieauth_callback():
 
     session["me"] = r.json().get("me")
     session["access_token"] = r.json().get("access_token")
+
+    print(session)
         
     try:
         soup = BeautifulSoup(r.json().get("me"), "html.parser")
         mp_endpoint = soup.find("link", attrs={"rel": "micropub"})
-        r = requests.get(mp_endpoint["href"] + "?q=config", headers={"Authorization": "Bearer " + response.access_token})
+        r = requests.get(mp_endpoint["href"] + "?q=config", headers={"Authorization": "Bearer " + r.json().get("access_token")})
         session["config"] = r.json()
-        r = requests.get(mp_endpoint["href"] + "?q=syndicate-to", headers={"Authorization": "Bearer " + response.access_token})
+        r = requests.get(mp_endpoint["href"] + "?q=syndicate-to", headers={"Authorization": "Bearer " + r.json().get("access_token")})
         session["syndication"] = r.json()
     except:
         pass
@@ -75,19 +77,31 @@ def discover_auth_endpoint():
 
     soup = BeautifulSoup(r.text, "html.parser")
 
-    token_endpoint = soup.find("link", rel="authorization_endpoint")
+    token_endpoint = soup.find("link", rel="token_endpoint")
+
+    authorization_endpoint = soup.find("link", rel="authorization_endpoint")
 
     if token_endpoint is None:
-        flash("An IndieAuth endpoint could not be found on your website.")
+        flash("An IndieAuth token endpoint could not be found on your website.")
         return redirect("/login")
 
     if not token_endpoint.get("href").startswith("https://") and not token_endpoint.get("href").startswith("http://"):
-        flash("Your IndieAuth endpoint published on your site must be a full HTTP URL.")
+        flash("Your IndieAuth token endpoint published on your site must be a full HTTP URL.")
+        return redirect("/login")
+
+    if authorization_endpoint is None:
+        flash("An IndieAuth authorization endpoint could not be found on your website.")
+        return redirect("/login")
+
+    if not authorization_endpoint.get("href").startswith("https://") and not authorization_endpoint.get("href").startswith("http://"):
+        flash("Your IndieAuth authorization endpoint published on your site must be a full HTTP URL.")
         return redirect("/login")
 
     token_endpoint = token_endpoint["href"]
 
     session["token_endpoint"] = token_endpoint
+
+    session["authorization_endpoint"] = authorization_endpoint["href"]
 
     random_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
@@ -101,7 +115,7 @@ def discover_auth_endpoint():
 
     session["state"] = state
 
-    return redirect(token_endpoint + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=create update delete media undelete profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
+    return redirect(authorization_endpoint["href"] + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=create update delete media undelete profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():

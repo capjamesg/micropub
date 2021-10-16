@@ -30,7 +30,7 @@
 """
 
 from functools import wraps
-from flask import request, Response, current_app, g
+from flask import request, Response, current_app, g, session
 import json
 try:
     # For Python 3.0 and later
@@ -116,6 +116,8 @@ def get_access_token():
       access_token = access_token.replace('Bearer ', '')
     if not access_token:
       access_token = request.form.get('access_token')
+    if not access_token:
+      access_token = session.get('access_token')
     if not access_token:
       access_token = get_access_token_from_json_request(request)
     return access_token
