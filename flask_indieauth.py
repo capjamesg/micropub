@@ -67,9 +67,11 @@ def check_auth(access_token):
 
     request = Request(
       current_app.config['TOKEN_ENDPOINT'],
-      headers={"Authorization": ("Bearer %s" % access_token)}
+      headers={"Authorization": "Bearer %s" % access_token}
     )
+    
     contents = urlopen(request).read().decode('utf-8')
+
     token_data = json.loads(contents)
 
     me = token_data['me']

@@ -8,7 +8,7 @@ def create_app():
 
     app.config['SECRET_KEY'] = os.urandom(32)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///auth.db'
-    app.config['TOKEN_ENDPOINT'] = "https://tokens.indieauth.com/token"
+    app.config['TOKEN_ENDPOINT'] = "https://auth.jamesg.blog/token"
     app.config['ME'] = "https://jamesg.blog"
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['REMEMBER_COOKIE_SECURE'] = True
