@@ -44,7 +44,7 @@ interactions = {
     "coffee": {
         "attribute": "coffee",
         "keyword": "",
-        "folder": "_drinking",
+        "folder": "_coffee",
         "category": "Coffee",
         "layout": "social_post"
     }

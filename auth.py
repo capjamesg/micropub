@@ -67,7 +67,7 @@ def logout():
     session.pop("me")
     session.pop("access_token")
 
-    return redirect("/home")
+    return redirect("/")
 
 @auth.route("/discover", methods=["POST"])
 def discover_auth_endpoint():

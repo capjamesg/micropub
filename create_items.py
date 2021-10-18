@@ -20,23 +20,27 @@ def process_social(repo, front_matter, interaction, content=None):
 
     json_content["layout"] = interaction.get("layout")
 
-    target = json_content.get(interaction.get("attribute"))[0]
+    target = json_content.get(interaction.get("attribute"))
 
-    if not target:
+    if not target and interaction.get("attribute") != "coffee" and interaction.get("attribute") != "rsvp":
         return jsonify({"message": "Please enter a {} target.".format(interaction.get("attribute"))}), 400
+    elif target:
+        target = target[0]
 
-    title_req = requests.get(target)
+        title_req = requests.get(target)
 
-    soup = BeautifulSoup(title_req.text, "lxml")
+        soup = BeautifulSoup(title_req.text, "lxml")
 
-    if title_req.status_code == 200 and soup and soup.title and soup.title.string:
-        title = soup.title.string.strip().replace("\n", "")
-    else:
-        title = target.replace("https://", "").replace("http://", "")
+        if title_req.status_code == 200 and soup and soup.title and soup.title.string:
+            title = soup.title.string.strip().replace("\n", "")
+        else:
+            title = target.replace("https://", "").replace("http://", "")
 
-    if content == None:
+    if content == None and target:
         content = "I {} <a href='{}' class='u-{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title)
         title = "{} {}".format(interaction.get("keyword").title(), title)
+    else:
+        title = "{}".format(interaction.get("keyword").title())
 
     front_matter = yaml.dump(json_content)
 
@@ -136,8 +140,8 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write("---\n")
         file.write(content)
 
-    # with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-    #     repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
+        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)

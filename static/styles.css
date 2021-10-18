@@ -340,3 +340,28 @@ ol {
 .active_tab {
   font-weight: 600;
 }
+.green_box {
+	background-color: white;
+	border: 1px solid lightgreen;
+	border-radius: 10px;
+	padding: 10px;
+}
+.context {
+	background-color: #f7f7f7;
+}
+.context, .box {
+	margin-top:10px;
+	margin-bottom: 20px;
+	border-radius: 15px;
+	padding: 10px;
+	border: 1px solid lightgrey;
+}
+.flex_item {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.box {
+	background-color: white;
+	padding: 20px;
+}

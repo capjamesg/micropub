@@ -67,13 +67,10 @@ def check_auth(access_token):
 
     request = Request(
       current_app.config['TOKEN_ENDPOINT'],
-      headers={"Authorization": "Bearer %s" % access_token}
+      headers={"Authorization": ("Bearer %s" % access_token)}
     )
-    
     contents = urlopen(request).read().decode('utf-8')
-
     token_data = json.loads(contents)
-
     me = token_data['me']
     client_id = token_data['client_id']
     if me is None or client_id is None:
@@ -132,3 +129,11 @@ def get_access_token_from_json_request(request):
         return jsondata['access_token']
     except ValueError:
         return None
+
+slugs = {}
+slug = "xyz"
+if slugs.get(slug):
+  slugs[slug] += 1
+  slug = slug + str(slugs[slug])
+else:
+  slugs[slug] = 1

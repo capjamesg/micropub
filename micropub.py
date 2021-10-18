@@ -71,7 +71,7 @@ def micropub_endpoint():
             del object_type["properties"]["content"]
 
         for root_property in root_properties:
-            if object_type.get(root_property) and object_type[root_property]["properties"].get("content") and type(object_type[root_property]["properties"].get("content")[0]) == str:
+            if object_type.get(root_property) and not object_type.get("drank") and object_type[root_property]["properties"].get("content") and type(object_type[root_property]["properties"].get("content")[0]) == str:
                 content = object_type[root_property]["properties"].get("content")[0]
                 del object_type[root_property]["properties"]["content"]
             elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
@@ -142,9 +142,11 @@ def micropub_endpoint():
         # This is deliberately empty to comply with the micropub spec
         response = {"media-endpoint": MEDIA_ENDPOINT_URL, "syndicate-to": []}
         return jsonify(response)
+
     elif request.args.get("q") and request.args.get("q") == "syndicate-to":
         response = {"syndicate-to": []}
         return jsonify(response)
+        
     elif request.args.get("q") and request.args.get("q") == "source" and request.args.get("url"):
         try:
             folder = request.args.get("url").split("/")[-2]
@@ -176,6 +178,7 @@ def micropub_endpoint():
         return abort(400)
 
 @micropub.route("/media", methods=["POST"])
+@requires_indieauth
 def media_endpoint():
     if request.method == "POST":
         if not request.headers["Content-Type"].startswith("multipart/form-data"):
@@ -194,6 +197,7 @@ def media_endpoint():
         filename = "".join(random.sample(string.ascii_letters, 5)) + secure_filename(file.filename)
         # save image as file then open with PIL for resizing
         file.save(os.path.join(UPLOAD_FOLDER, filename))
+
         if ext == ".jpg" or ext == ".jpeg":
             image_file_local = Image.open(os.path.join(UPLOAD_FOLDER, filename))
             image_file_local = ImageOps.exif_transpose(image_file_local)

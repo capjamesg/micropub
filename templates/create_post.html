@@ -35,6 +35,14 @@
         <input type="hidden" name="action" id="action" value="create" required />
         <input type="submit" value="Submit post">
     </form>
+    {% elif post_type == "photo" %}
+    <h1>Upload a photo to your website 📷</h1>
+    <p>Use the form below to upload a picture to your website.</p>
+    <form action="/media-forward" method="POST" enctype="multipart/form-data">
+        <label for="photo">Post image:</label><br>
+        <input type="file" name="photo" id="photo" accept="image/*"><br>
+        <input type="submit" value="Submit image">
+    </form>
     {% elif post_type == "note" %}
     <h1>Create a note 📝</h1>
     <p>Use the form below to create a note on your personal website.</p>
