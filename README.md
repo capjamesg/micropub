@@ -31,6 +31,8 @@ To use this endpoint, you need to create a config.py file with the following val
     GITHUB_KEY = "GITHUB_ACCESS_TOKEN"
     GOOGLE_API_KEY = "GOOGLE_CLOUD_API_KEY"
 
+    TWITTER_BEARER_TOKEN = "TWITTER_API_TOKEN"
+
 These values are all required for the endpoint to work. UPLOAD_FOLDER and HOME_FOLDER should be where you keep your website assets folder and website root folder, respectively. In my case, UPLOAD_FOLDER points to my /assets/ folder in my Jekyll repository and HOME_FOLDER points to my root folder in my Jekyll repository.
 
 This project uses PyGitHub to upload posts published through the Micropub server to GitHub. For this feature to work, you need to specify a GitHub access token that has access to read and write to a repository.

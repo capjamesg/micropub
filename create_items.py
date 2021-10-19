@@ -22,7 +22,7 @@ def process_social(repo, front_matter, interaction, content=None):
 
     target = json_content.get(interaction.get("attribute"))
 
-    if not target and interaction.get("attribute") != "coffee" and interaction.get("attribute") != "rsvp":
+    if not target and interaction.get("attribute") != "coffee" and interaction.get("attribute") != "rsvp" and interaction.get("attribute") != "note":
         return jsonify({"message": "Please enter a {} target.".format(interaction.get("attribute"))}), 400
     elif target:
         target = target[0]
@@ -65,29 +65,48 @@ def process_checkin(repo, front_matter, content):
 
     json_content["layout"] = "social_post"
 
-    if not json_content.get("name")[0] or not json_content.get("latitude") or not json_content.get("longitude"):
-        return jsonify({"message": "Please enter a venue name, latitude, and longitude."}), 400
+    source = None
 
-    if not json_content.get("street_address") or not json_content.get("locality") or not json_content.get("region") or not json_content.get("country_name"):
-        r = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(json_content.get("latitude"), json_content.get("longitude"), GOOGLE_API_KEY))
+    if json_content.get("syndication") and type(json_content.get("syndication")) == list and \
+        json_content.get("syndication")[0].startswith("https://www.swarmapp.com"):
+        source = "swarm"
 
-        if r.status_code == 200:
-            data = r.json()
+    if source != "swarm":
 
-            if len(data["results"]) > 0:
-                if not json_content.get("street_address"):
-                    json_content["street_address"] = data["results"][0]["formatted_address"]
-                
-                if not json_content.get("locality"):
-                    json_content["locality"] = data["results"][0]["address_components"][2]["long_name"]
-                
-                if not json_content.get("region"):
-                    json_content["region"] = data["results"][0]["address_components"][4]["long_name"]
+        if not json_content.get("name")[0] or not json_content.get("latitude") or not json_content.get("longitude"):
+            return jsonify({"message": "Please enter a venue name, latitude, and longitude."}), 400
 
-                if not json_content.get("country_name"):
-                    json_content["country_name"] = data["results"][0]["address_components"][-2]["long_name"]
+        if not json_content.get("street_address") or not json_content.get("locality") or not json_content.get("region") or not json_content.get("country_name"):
+            r = requests.get("https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(json_content.get("latitude"), json_content.get("longitude"), GOOGLE_API_KEY))
 
-    slug = json_content.get("name")[0].replace(" ", "-").replace(".", "-").replace("-", "").replace(",", "").lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
+            if r.status_code == 200:
+                data = r.json()
+
+                if len(data["results"]) > 0:
+                    if not json_content.get("street_address"):
+                        json_content["street_address"] = data["results"][0]["formatted_address"]
+                    
+                    if not json_content.get("locality"):
+                        json_content["locality"] = data["results"][0]["address_components"][2]["long_name"]
+                    
+                    if not json_content.get("region"):
+                        json_content["region"] = data["results"][0]["address_components"][4]["long_name"]
+
+                    if not json_content.get("country_name"):
+                        json_content["country_name"] = data["results"][0]["address_components"][-2]["long_name"]
+
+        slug = json_content.get("name")[0].replace(" ", "-").replace(".", "-").replace("-", "").replace(",", "").lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
+
+        if not content:
+            content = "Checked in to {}.".format(json_content.get("name")[0].replace(":", ""))
+
+        title = "Checkin to {}".format(json_content.get("name")[0])
+    else:
+        slug = "".join(random.sample(string.ascii_letters, 3))
+
+        if not content:
+            content = "Checked in to {}.".format(json_content["checkin"][0]["properties"]["name"][0].replace(":", ""))
+            title = content
 
     if json_content.get("url"):
         json_content["syndicate"] = json_content["url"]
@@ -95,10 +114,7 @@ def process_checkin(repo, front_matter, content):
 
     front_matter = yaml.dump(json_content)
 
-    if not content:
-        content = "Checked in to {}.".format(json_content.get("name")[0].replace(":", ""))
-
-    return write_to_file(front_matter, content, repo, "Checkin to {}".format(json_content.get("name")[0]), "_checkin", slug=slug, category="Checkin"), 201
+    return write_to_file(front_matter, content, repo, title, "_checkin", slug=slug, category="Checkin"), 201
 
 def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None, category=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -255,7 +271,6 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
         file.write(full_contents_for_writing)
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
-        print(file.read())
         repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
 
     resp = jsonify({"message": "Post updated."})

@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
-  <section>
-      <h1>Micropub Dashboard</h1>
-      <p>Sign in is powered by IndieAuth which means you can log in to the micropub dashboard with your domain name.</p>
-      <p>Enter your domain name below to log in to the dashboard.</p>
-      <p>Only approved domain names can log in to the dashboard.</p>
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-          <p class="error">
-              <em>{{ messages[0] }}</em>
-          </p>
-      {% endif %}
-      {% endwith %}
-      <form action="{{ config.AUTH_ENDPOINT }}" method="GET">
-        <label for="indie_auth_url">Web Address:</label><br>
-        <input id="indie_auth_url" type="url" name="me" placeholder="https://yourdomain.com" /><br>
-        <input type="submit" value="Sign In" />
-        <input type="hidden" name="client_id" value="{{ config.CLIENT_ID }}" />
-        <input type="hidden" name="redirect_uri" value="{{ config.CALLBACK_URL }}" />
-        <input type="hidden" name="response_type" value="code" />
-        <input type="hidden" name="scope" value="create profile" />
-        <input type="hidden" name="state" value="{{ state }}" />
-        <input type="hidden" name="code_challenge" value="{{ code_challenge }}" />
-        <input type="hidden" name="code_challenge_method" value="S256" />
-      </form>
-  </section>
+<section class="main_content_box">
+    <h1>Micropub Dashboard</h1>
+    <p>Sign in is powered by IndieAuth which means you can log in to the micropub dashboard with your domain name.</p>
+    <p>Enter your domain name below to log in to the dashboard.</p>
+    <p>Only approved domain names can log in to the dashboard.</p>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <p class="error">
+            <em>{{ messages[0] }}</em>
+        </p>
+    {% endif %}
+    {% endwith %}
+    <form action="{{ config.AUTH_ENDPOINT }}" method="GET">
+      <label for="indie_auth_url">Web Address:</label><br>
+      <input id="indie_auth_url" type="url" name="me" placeholder="https://yourdomain.com" /><br>
+      <input type="submit" value="Sign In" />
+      <input type="hidden" name="client_id" value="{{ config.CLIENT_ID }}" />
+      <input type="hidden" name="redirect_uri" value="{{ config.CALLBACK_URL }}" />
+      <input type="hidden" name="response_type" value="code" />
+      <input type="hidden" name="scope" value="create profile" />
+      <input type="hidden" name="state" value="{{ state }}" />
+      <input type="hidden" name="code_challenge" value="{{ code_challenge }}" />
+      <input type="hidden" name="code_challenge_method" value="S256" />
+    </form>
+</section>
 {% endblock %}

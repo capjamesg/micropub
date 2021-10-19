@@ -25,7 +25,7 @@ def index():
         if user:
             url = request.form["url"]
             if request.form["action"] == "update":
-                return redirect("/update/?url={}".format(url))
+                return redirect("/update?url={}".format(url))
             elif request.form["action"] == "delete":
                 r = requests.post(ENDPOINT_URL, json={"type": ["h-entry"], "action": "delete", "url": url}, headers={"Authorization": "Bearer {}".format(user)})
                 if r.status_code == 200 or r.status_code == 201:
@@ -56,7 +56,7 @@ def create_post():
         user = session["access_token"]
         me = session["me"]
     else:
-        return redirect("/login?scope=post, create, update, delete, undelete")
+        return redirect("/login")
 
     post_type = request.args.get("type")
 
@@ -250,7 +250,7 @@ def create_post():
 
     return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me, url=url, h_entry=h_entry, site_supports_webmention=site_supports_webmention)
 
-@client.route("/update/", methods=["GET", "POST"])
+@client.route("/update", methods=["GET", "POST"])
 def update_post():
     id = request.args.get("url")
 
@@ -258,7 +258,7 @@ def update_post():
         user = session["access_token"]
         me = session["me"]
     else:
-        return redirect("/login?scope=post, create, update, delete, undelete")
+        return redirect("/login")
 
     if "/checkin/" in id:
         post_type = "checkin"
@@ -348,7 +348,7 @@ def settings():
         else:
             syndication = None
     else:
-        return redirect("/login?scope=post, create, update, delete, undelete")
+        return redirect("/login")
     
     return render_template("settings.html", title="Settings | Micropub Endpoint", user=user, me=me, syndication=syndication)
 
@@ -358,13 +358,16 @@ def schemas():
         user = session["access_token"]
         me = session["me"]
     else:
-        return redirect("/login?scope=post, create, update, delete, undelete")
+        return redirect("/login")
     
     return render_template("schemas.html", title="Schemas | Micropub Endpoint", user=user, me=me)
 
 # use this to forward client-side uploads from /post?type=photo to the /media micropub endpoint
 @client.route("/media-forward", methods=["POST"])
 def forward_media_query():
+    if not session.get("access_token"):
+        return redirect("/login")
+
     photo = request.files.get("photo")
 
     if not photo:
@@ -394,3 +397,7 @@ def forward_media_query():
 @client.route("/robots.txt")
 def robots():
     return send_from_directory(client.static_folder, "robots.txt")
+
+@client.route("/favicon.ico")
+def favicon():
+    return send_from_directory(client.static_folder, "favicon.ico")

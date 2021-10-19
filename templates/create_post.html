@@ -191,12 +191,30 @@
         <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
+        <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
         <input type="submit" value="Submit reply">
     </form>
+    <script>
+        var char_count = 0;
+
+        var input = document.getElementById("content");
+        var character_count_element = document.getElementById("character_count");
+
+        input.onkeydown = function(e) {
+            if (e.keyCode != 8) {
+                char_count++;
+            character_count_element.innerHTML = char_count;
+
+            } else {
+                char_count--;
+            character_count_element.innerHTML = char_count;
+            }
+        }
+    </script>
     {% endif %}
 </section>
 {% endblock %}

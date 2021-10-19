@@ -84,7 +84,7 @@ def micropub_endpoint():
             del object_type["content"]
 
         if object_type.get("properties") and object_type.get("properties").get("checkin"):
-            front_matter = yaml.dump(object_type["properties"]["checkin"][0]["properties"])
+            front_matter = yaml.dump(object_type["properties"])
         elif object_type.get("p-rsvp") and object_type.get("p-rsvp").get("properties"):
             front_matter = yaml.dump(object_type.get("p-rsvp").get("properties"))
         elif object_type.get("properties"):
@@ -134,9 +134,9 @@ def micropub_endpoint():
         if object_type.get("drank"):
             return create_items.process_social(repo, front_matter, interactions.get("coffee"), content)
         elif post_type == "entry":
-            return create_items.process_post(repo, front_matter, interactions.get("note"), content)
+            return create_items.process_social(repo, front_matter, interactions.get("note"), content)
         else:
-            return jsonify({"message": "Invalid post type."}), 400
+            return create_items.process_social(repo, front_matter, interactions.get("note"), content)
 
     if request.args.get("q") and request.args.get("q") == "config":
         # This is deliberately empty to comply with the micropub spec

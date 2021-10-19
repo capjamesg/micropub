@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from .config import TWITTER_BEARER_TOKEN
 import requests
 import mf2py
 
@@ -47,8 +48,12 @@ def get_reply_context(url, request_type):
                         author_image = "https://" + domain + photo_url
                 else:
                     author_image = None
+
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             elif h_entry["properties"].get("content"):
                 post_body = h_entry["properties"]["content"]
+
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             else:
                 post_body = None
 
@@ -66,6 +71,34 @@ def get_reply_context(url, request_type):
             return h_entry, site_supports_webmention
             
         h_entry = {}
+
+        if url.startswith("https://twitter.com"):
+            site_supports_webmention = False
+            tweet_uid = url.strip("/").split("/")[-1]
+            headers = {
+                "Authorization": "Bearer {}".format(TWITTER_BEARER_TOKEN)
+            }
+            r = requests.get("https://api.twitter.com/2/tweets/{}?tweet.fields=author_id".format(tweet_uid), headers=headers)
+
+            if r and r.status_code != 200:
+                return {}, None
+
+            print(r.json()["data"].keys())
+
+            get_author = requests.get("https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")), headers=headers)
+
+            if get_author and get_author.status_code == 200:
+                photo_url = get_author.json()["data"].get("profile_image_url")
+                author_name = get_author.json()["data"].get("name")
+                author_url = "https://twitter.com/" + get_author.json()["data"].get("username")
+            else:
+                photo_url = None
+                author_name = None
+                author_url = None
+
+            h_entry = {"p-name": "", "post_body": r.json()["data"].get("text"), "author_image": photo_url, "author_url": author_url, "author_name": author_name}
+
+            return h_entry, site_supports_webmention
 
         try:
             soup = BeautifulSoup(requests.get(url).text, "html.parser")
@@ -88,8 +121,17 @@ def get_reply_context(url, request_type):
                 p_tag = None
 
             if soup.select('.e-content'):
-                p_tag = soup.select('.e-content')[0].text
-                p_tag = " ".join([w for w in p_tag.split(" ")[:75]])
+                p_tag = soup.select('.e-content')[0]
+
+                # get first paragraph
+                if p_tag:
+                    p_tag = p_tag.find("p")
+                    if p_tag:
+                        p_tag = p_tag.text
+
+                    p_tag = " ".join([w for w in p_tag.split(" ")[:75]]) + " ..."
+                else:
+                    p_tag = ""
 
             if soup.select('.u-photo'):
                 photo_url = soup.select('.u-photo')[0]['src']
@@ -111,29 +153,6 @@ def get_reply_context(url, request_type):
 
             h_entry = {"p-name": page_title, "post_body": p_tag, "author_image": photo_url, "author_url": domain, "author_name": domain}
 
-            return h_entry, site_supports_webmention
-        except:
-            pass
-
-        try:
-            if parsed["items"][0]["properties"].get("photo"):
-                photo_url = parsed["items"][0]["properties"]["photo"][0]
-                if not photo_url.startswith("https://") or not photo_url.startswith("http://"):
-                    photo_url = "https://" + domain + photo_url
-
-            if len(parsed["items"]) > 0:
-                if parsed["items"][0]["properties"].get("photo"):
-                    author_name = parsed["items"][0]["properties"]["name"][0]
-                else:
-                    author_name = h_entry["author_name"]
-
-                if parsed["items"][0]["properties"].get("url"):
-                    author_url = parsed["items"][0]["properties"]["url"][0]
-                else:
-                    author_url = h_entry["author_url"]
-
-            h_entry = {"author_image": photo_url, "author_url": author_url, "author_name": author_name, "post_body": p_tag, "p-name": page_title}
-            
             return h_entry, site_supports_webmention
         except:
             pass
