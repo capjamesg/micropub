@@ -39,6 +39,8 @@
     <h1>Upload a photo to your website 📷</h1>
     <p>Use the form below to upload a picture to your website.</p>
     <form action="/media-forward" method="POST" enctype="multipart/form-data">
+        <label for="filename">File Name (optional):</label>
+        <input type="text" name="filename" id="filename" placeholder="indieweb_photo.png" /><br>
         <label for="photo">Post image:</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <input type="submit" value="Submit image">

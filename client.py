@@ -32,19 +32,23 @@ def index():
                     flash("Your {} post was successfully deleted.".format(url))
                 else:
                     flash(r.json()["message"].strip("."))
-                return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
+                return render_template("dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
             elif request.form["action"] == "undelete":
                 r = requests.post(ENDPOINT_URL, json={"type": ["h-entry"], "action": "undelete", "url": url}, headers={"Authorization": "Bearer {}".format(user)})
                 if r.status_code == 200 or r.status_code == 201:
                     flash("Your {} post was successfully undeleted.".format(url))
                 else:
                     flash(r.json()["message"].strip("."))
-                return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
+                return render_template("dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
             else:
                 return redirect("/")
         else:
             abort(403)
-    return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action=None)
+
+    if user != None:
+        return render_template("dashboard.html", user=user, me=me, title="Dashboard | Micropub Endpoint", action=None)
+    else:
+        return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action=None)
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
@@ -53,9 +57,6 @@ def create_post():
         me = session["me"]
     else:
         return redirect("/login?scope=post, create, update, delete, undelete")
-
-    user = ""
-    me = "s"
 
     post_type = request.args.get("type")
 
@@ -372,10 +373,15 @@ def forward_media_query():
 
     if not session.get("access_token"):
         return jsonify({"error": "You must be logged in to upload a photo."}), 401
+    
+    if request.form.get("filename"):
+        filename = secure_filename(request.form.get("filename"))
+    else:
+        filename = secure_filename(photo.filename)
 
-    photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
+    photo.save(os.path.join(UPLOAD_FOLDER, filename))
 
-    r = requests.post(MEDIA_ENDPOINT_URL, files={"file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')}, headers={"Authorization": "Bearer {}".format(session["access_token"])})
+    r = requests.post(MEDIA_ENDPOINT_URL, files={"file": (filename,open(os.path.join(UPLOAD_FOLDER, filename), "rb"), 'image/jpeg')}, headers={"Authorization": "Bearer {}".format(session["access_token"])})
 
     if r.status_code != 201:
         flash("Error: " + str(r.json()["message"]))

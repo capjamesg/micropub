@@ -1,66 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>James' Micropub Endpoint</h1>
-<section>
-    {% if action == None %}
-    <p>Welcome to James' Micropub Endpoint.</p>
-    {% endif %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-        {% endif %}
-    {% endwith %}
-    {% if user and action == None %}
-        <section class="box">
-            <h2>Create posts</h2>
-            <p>You can:</p>
-            <ul>
-                <li><a href="/post">Reply to a post 💬</a></li>
-                <li><a href="/post?type=coffee">Create a drinking post ☕</a></li>
-                <li><a href="/post?type=like">Like a post ❤️</a></li>
-                <li><a href="/post?type=note">Create a note 📝</a></li>
-                <li><a href="/post?type=rsvp">Create an RSVP 📅</a></li>
-                <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
-                <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
-                <li><a href="/post?type=repost">Share a link 🔁</a></li>
-                <li><a href="/post?type=photo">Upload a photo 📷</a></li>
-            </ul>
-        </section>
-        <section class="box">
-            <h2>Update a post</h2>
-            <p>You can update a drinking post or reply you have already created.</p>
-            <form method="post" action="/">
-                <label for="url">URL of post to edit:</label><br>
-                <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
-                <input type="hidden" name="action" id="action" value="update" />
-                <input type="submit" value="Edit post">
-            </form>
-        </section>
-        <section class="box">
-            <h2>Delete a post</h2>
-            <p>You can delete a drinking post, reply, or like.</p>
-            <form method="post" action="/">
-                <label for="url">URL of post to delete:</label><br>
-                <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
-                <input type="hidden" name="action" id="action" value="delete" />
-                <input type="submit" value="Delete post">
-            </form>
-        </section>
-        <section class="box">
-            <h2>Undelete a post</h2>
-            <p>You can delete any post you have created.</p>
-            <form method="post" action="/">
-                <label for="url">URL of post to undelete:</label><br>
-                <input type="text" name="url" id="url" placeholder="https://jamesg.blog" required><br>
-                <input type="hidden" name="action" id="action" value="undelete" />
-                <input type="submit" value="Undelete post">
-            </form>
-        </section>
-        <section>
-    {% elif user and action == "delete" %}
-        <p><a href="/">Click here to go back home.</a></p>
-    {% endif %}
+<section class="feed h-app h-x-app main_content_box">
+    <img src="https://jamesg.blog/assets/coffeeshop.jpg" height="100" width="100" class="u-logo" alt="James sitting in a coffee shop, happily staring at a cup of coffee.">
+    <h1>Welcome to <a href="https://micropub.jamesg.blog" class="u-url p-name">James' Micropub Endpoint</a>!</h1>
+    <p>This Micropub endpoint is run by {{ config.ME }}.</p>
+    <p>If you are the owner of this site, you can log in and create, update, and delete content on your site.</p>
+    <h2>What is Micropub?</h2>
+    <p>Micropub is a W3C standard that specifies methods for creating, updating, and deleting content on your website. Because all Micropub clients and servers are developed in adherence to the same standard, you can use a client to create any type of post that your server can then process in the way you want.</p>
+    <p>James, the creator of this tool, uses Micropub to create posts that show what coffees he is drinking, upload "likes" to his website, and more.</p>
+    <p>There are two components to Micropub. First, there is the client. The client lets you create posts through a website or an application. Second, there is the server. The server turns the information you give to the client into a post on your website.</p>
+    <h2>How can I learn more about Micropub?</h2>
+    <p>The IndieWeb wiki contains extensive detail on Micropub. You will find guidance on the basics of Micropub, how it works, and how to use Micropub on your own website.</p>
+    <p>Some useful resources to look at are the following pages:</p>
+    <ul>
+        <li><a href="https://indieweb.org/Micropub">Micropub</a></li>
+        <li><a href="https://indieweb.org/Micropub/Clients">Micropub Clients</a></li>
+        <li><a href="https://indieweb.org/Micropub/Servers">Micropub Servers</a></li>
+    </ul>
+    <h2>Can I host my own Micropub client and server?</h2>
+    <p>Yes! You can host your own Micropub endpoint. This client and server is open-sourced so you can use this one if you would like. Please note the server part of this application was designed specifically to turn posts into markdown files with front matter. This is the ideal configuration if you choose to use a static generator like Jekyll on your site.
+        You can deploy a version of this Micropub client and server by going to <a href="https://github.com/capjamesg/micropub">the project GitHub page</a> and following the instructions.</p>
+    <p>You can find other Micropub clients on the <a href="https://indieweb.org/Micropub/Clients">IndieWeb wiki</a>.</p>
 </section>
 {% endblock %}

@@ -213,7 +213,14 @@ a:focus {
 	outline: lightblue 2px;
 	border-bottom: 2px dotted black;
 }
-
+.main_content_box {
+	max-width: 35em;
+	background-color: white;
+	border-radius: 10px;
+	border: 1px solid lightgray;
+	padding: 20px;
+	margin: auto;
+}
 input[type="text"]:focus, input[type="radio"]:focus, input[type="url"]:focus, input[type="number"]:focus, textarea:focus, input[type="text"]:focus, input[type="username"]:focus, input[type="password"]:focus {
 	outline: 3px solid royalblue;
 }
