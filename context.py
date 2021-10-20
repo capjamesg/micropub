@@ -5,6 +5,7 @@ import mf2py
 
 def get_reply_context(url, request_type):
     h_entry = None
+    photo_url = None
     site_supports_webmention = False
 
     if request_type == "like-of" or request_type == "repost-of" or request_type == "bookmark-of" or request_type == "in-reply-to" and (url.startswith("https://") or url.startswith("http://")):
@@ -21,19 +22,31 @@ def get_reply_context(url, request_type):
         if parsed["items"] and parsed["items"][0]["type"] == ["h-entry"]:
             h_entry = parsed["items"][0]
 
+            author_url = None
+            author_name = None
+            author_image = None
+
             if h_entry["properties"].get("author"):
-                author_url = h_entry['properties']['author'][0]['properties']['url'][0] if h_entry['properties']['author'][0]['properties'].get('url') else None
-                author_name = h_entry['properties']['author'][0]['properties']['name'][0] if h_entry['properties']['author'][0]['properties'].get('name') else None
-                author_image = h_entry['properties']['author'][0]['properties']['photo'][0] if h_entry['properties']['author'][0]['properties'].get('photo') else None
-                if author_url.startswith("/"):
+                if type(h_entry["properties"]["author"][0]) == dict and h_entry["properties"]["author"][0].get("type") == ["h-card"]:
+                    author_url = h_entry['properties']['author'][0]['properties']['url'][0] if h_entry['properties']['author'][0]['properties'].get('url') else url
+                    author_name = h_entry['properties']['author'][0]['properties']['name'][0] if h_entry['properties']['author'][0]['properties'].get('name') else None
+                    author_image = h_entry['properties']['author'][0]['properties']['photo'][0] if h_entry['properties']['author'][0]['properties'].get('photo') else None
+                elif type(h_entry["properties"]["author"][0]) == str:
+                    if h_entry["properties"].get("author") and h_entry["properties"]["author"][0].startswith("/"):
+                        author_url = url.split("/")[0] + "//" + domain + h_entry["properties"].get("author")[0]
+
+                    author = mf2py.parse(requests.get(author_url).text)
+                    
+                    if author["items"] and author["items"][0]["type"] == ["h-card"]:
+                        author_url = h_entry['properties']['author'][0]
+                        author_name = author['items'][0]['properties']['name'][0] if author['items'][0]['properties'].get('name') else None
+                        author_image = author['items'][0]['properties']['photo'][0] if author['items'][0]['properties'].get('photo') else None
+
+                if author_url != None and author_url.startswith("/"):
                     author_url = url.split("/")[0] + "//" + domain + author_url
 
-                if author_image.startswith("/"):
+                if author_image != None and author_image.startswith("/"):
                     author_image = url.split("/")[0] + "//" + domain + author_image
-            else:
-                author_url = None
-                author_name = None
-                author_image = None
 
             if h_entry["properties"].get("content") and h_entry["properties"].get("content")[0].get("html"):
                 post_body = h_entry["properties"]["content"][0]["html"]
@@ -58,17 +71,50 @@ def get_reply_context(url, request_type):
                 post_body = None
 
             # get p-name
-            if h_entry["properties"].get("p-name"):
-                p_name = h_entry["properties"]["p-name"][0]
+            if h_entry["properties"].get("name"):
+                p_name = h_entry["properties"]["name"][0]
             else:
                 p_name = None
 
-            if not author_url.startswith("https://") and not author_url.startswith("http://"):
+            if author_url != None and (not author_url.startswith("https://") and not author_url.startswith("http://")):
                 author_url = "https://" + author_url
+
+            if not author_name and author_url:
+                author_name = author_url.split("/")[2]
 
             h_entry = {"author_image": author_image, "author_url": author_url, "author_name": author_name, "post_body": post_body, "p-name": p_name}
 
             return h_entry, site_supports_webmention
+
+        elif parsed["items"] and parsed["items"][0]["type"] == ["h-card"]:
+            h_card = parsed["items"][0]
+
+            if h_card["properties"].get("name"):
+                author_name = h_card['properties']['name'][0]
+            else:
+                author_name = None
+
+            if h_card["properties"].get("photo"):
+                author_image = h_card['properties']['photo'][0]
+                if author_image.startswith("//"):
+                    author_image = "https:" + author_image
+                elif author_image.startswith("/"):
+                    author_image = url.split("/")[0] + "//" + domain + author_image
+                elif author_image.startswith("http://") or author_image.startswith("https://"):
+                    author_image = author_image
+                else:
+                    author_image = "https://" + domain + "/" + author_image
+            else:
+                author_image = None
+
+            if h_card["properties"].get("note"):
+                post_body = h_card['properties']['note'][0]
+            else:
+                post_body = None
+
+            h_card = {"author_image": author_image, "author_url": url, "author_name": author_name, "post_body": post_body, "p-name": None}
+
+            return h_card, site_supports_webmention
             
         h_entry = {}
 
@@ -100,61 +146,55 @@ def get_reply_context(url, request_type):
 
             return h_entry, site_supports_webmention
 
-        try:
-            soup = BeautifulSoup(requests.get(url).text, "html.parser")
+        soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
-            page_title = soup.find("title")
+        page_title = soup.find("title")
 
-            if page_title:
-                page_title = page_title.text
+        if page_title:
+            page_title = page_title.text
 
-            # get body tag
-            main_tag = soup.find("body")
+        # get body tag
+        main_tag = soup.find("body")
 
-            if main_tag:
-                p_tag = main_tag.find("p")
-                if p_tag:
-                    p_tag = p_tag.text
-                else:
-                    p_tag = None
+        if main_tag:
+            p_tag = main_tag.find("h1")
+            if p_tag:
+                p_tag = p_tag.text
             else:
                 p_tag = None
+        else:
+            p_tag = None
 
-            if soup.select('.e-content'):
-                p_tag = soup.select('.e-content')[0]
+        if soup.select('.e-content'):
+            p_tag = soup.select('.e-content')[0]
 
-                # get first paragraph
+            # get first paragraph
+            if p_tag:
+                p_tag = p_tag.find("p")
                 if p_tag:
-                    p_tag = p_tag.find("p")
-                    if p_tag:
-                        p_tag = p_tag.text
+                    p_tag = p_tag.text
 
-                    p_tag = " ".join([w for w in p_tag.split(" ")[:75]]) + " ..."
-                else:
-                    p_tag = ""
-
-            if soup.select('.u-photo'):
-                photo_url = soup.select('.u-photo')[0]['src']
-                
-            favicon = soup.find("link", rel="icon")
-
-            if favicon and not photo_url:
-                photo_url = favicon["href"]
-                if not photo_url.startswith("https://") or not photo_url.startswith("http://"):
-                    photo_url = "https://" + domain + photo_url
+                p_tag = " ".join([w for w in p_tag.split(" ")[:75]]) + " ..."
             else:
-                photo_url = None
+                p_tag = ""
 
-            if not domain.startswith("https://") and not domain.startswith("http://"):
-                author_url = "https://" + domain
+        if soup.select('.u-photo'):
+            photo_url = soup.select('.u-photo')[0]['src']
+            
+        favicon = soup.find("link", rel="icon")
 
-            if page_title[:10] == p_tag[:10]:
-                page_title = None
+        if favicon and not photo_url:
+            photo_url = favicon["href"]
+            if not photo_url.startswith("https://") and not photo_url.startswith("http://"):
+                photo_url = "https://" + domain + photo_url
+        else:
+            photo_url = None
 
-            h_entry = {"p-name": page_title, "post_body": p_tag, "author_image": photo_url, "author_url": domain, "author_name": domain}
+        if not domain.startswith("https://") and not domain.startswith("http://"):
+            author_url = "https://" + domain
 
-            return h_entry, site_supports_webmention
-        except:
-            pass
+        h_entry = {"p-name": page_title, "post_body": p_tag, "author_image": photo_url, "author_url": "https://" + domain, "author_name": domain}
+
+        return h_entry, site_supports_webmention
 
     return h_entry, site_supports_webmention

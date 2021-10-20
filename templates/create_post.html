@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<section>
+<section class="main_content_box">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
@@ -53,6 +53,7 @@
         <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="20"></textarea><br>
+        {% include "reply_emojis.html" %}
         <label for="photo">Post image (optional):</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -84,6 +85,7 @@
         <input type="number" name="longitude" id="longitude" step="any" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15"></textarea><br>
+        {% include "reply_emojis.html" %}
         <label for="photo">Post image (optional):</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -176,6 +178,7 @@
         <input type="time" name="event_time" id="event_time" placeholder="12:00" /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15"></textarea><br>
+        {% include "reply_emojis.html" %}
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="RSVP" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -192,29 +195,41 @@
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
         <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
+        {% include "reply_emojis.html" %}
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
         <input type="submit" value="Submit reply">
     </form>
-    <script>
-        var char_count = 0;
-
-        var input = document.getElementById("content");
-        var character_count_element = document.getElementById("character_count");
-
-        input.onkeydown = function(e) {
-            if (e.keyCode != 8) {
-                char_count++;
-            character_count_element.innerHTML = char_count;
-
-            } else {
-                char_count--;
-            character_count_element.innerHTML = char_count;
-            }
-        }
-    </script>
     {% endif %}
 </section>
+<script>
+    var char_count = 0;
+
+    var input = document.getElementById("content");
+    var character_count_element = document.getElementById("character_count");
+
+    input.onkeydown = function(e) {
+        if (e.keyCode != 8 && char_count < 1) {
+            char_count++;
+            character_count_element.innerHTML = char_count;
+
+        } else if (char_count < 1) {
+            char_count--;
+            character_count_element.innerHTML = char_count;
+        }
+    }
+
+    function add_emoji(emoji) {
+        var url = document.getElementById("in-reply-to").value;
+        if (emoji == "🪀") {
+            emoji = "<a href='" + url + "' class='u-yo-of'>Yo! 🪀</a>"
+        } else if (emoji == "👉") {
+            emoji = "<a href='" + url + "' class='u-poke-of'>Poke 👉</a>"
+        }
+        char_count++;
+        input.value += emoji;
+    }
+</script>
 {% endblock %}

@@ -194,7 +194,7 @@ def media_endpoint():
         if ext not in (".jpg", ".jpeg", ".png", ".gif"):
             return jsonify({"message": "Please send a valid image file."}), 400
 
-        filename = "".join(random.sample(string.ascii_letters, 5)) + secure_filename(file.filename) + "-"
+        filename = "".join(random.sample(string.ascii_letters, 5)) + "-" + secure_filename(file.filename)
 
         # save image as file then open with PIL for resizing
 

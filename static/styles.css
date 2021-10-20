@@ -92,7 +92,6 @@ h1 {
 	width: inherit !important;
 }
 img {
-	width: 100%;
 	border-radius: 10px;
 }
 footer {
@@ -155,12 +154,24 @@ details {
 	padding: 10px;
 	display: inline;
 	border: 3px dashed orange;
+	display: block;
+	max-width: 35em;
+}
+details span {
+	border: 1px solid lightgray;
+	padding: 20px;
+	border-radius: 10px;
+	margin-bottom: 5px;
+	display: inline-block;
 }
 summary {
 	padding-top: 5px;
 }
 details > p {
 	margin-bottom: 0px;
+}
+details {
+	margin-bottom: 10px;
 }
 a {
 	color: #006BD6;
@@ -252,7 +263,8 @@ input[type="text"], input[type="username"], input[type="password"], input[type="
     font-size: 1.0625rem;
 }
 textarea {
-	width: 75%;
+	width: 100%;
+	box-sizing:border-box;
 }
 input[type="submit"] {
     padding: 10px;
@@ -264,18 +276,15 @@ input[type="submit"] {
     min-width: 0 !important;
     font-size: 1.1875rem;
 }
-
 .error {
 	font-weight: 600;
 }
-
 br {
 	margin-top: 10px;
 }
 li {
 	line-height: 2em;
 }
-
 @media print {
 	html {
 		background-color: white;
@@ -316,9 +325,6 @@ h1 {
 	display: inline-block;
 	margin-bottom: 5px;
 }
-img {
-	  width: 75% !important;
-}
 input {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -326,7 +332,8 @@ input {
   border-radius: 10px;
   margin-bottom: 10px;
   display: inline-block;
-  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 pre {
   background-color: white;
