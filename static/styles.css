@@ -152,9 +152,9 @@ details {
 	background-color: white;
 	border-radius: 5px;
 	padding: 10px;
-	display: inline;
 	border: 3px dashed orange;
 	display: block;
+	margin-bottom: 5px;
 	max-width: 35em;
 }
 details span {
@@ -363,7 +363,7 @@ ol {
 .context {
 	background-color: #f7f7f7;
 }
-.context, .box {
+.context, .box, .possible_emojis {
 	margin-top:10px;
 	margin-bottom: 20px;
 	border-radius: 15px;

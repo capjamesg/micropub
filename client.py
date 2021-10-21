@@ -401,3 +401,7 @@ def robots():
 @client.route("/favicon.ico")
 def favicon():
     return send_from_directory(client.static_folder, "favicon.ico")
+
+@client.route("/emojis.json")
+def emojis():
+    return send_from_directory(client.static_folder, "emojis.json")

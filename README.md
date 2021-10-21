@@ -80,3 +80,11 @@ Here are some relevant resources that you might find useful if you are intereste
 
 - [Micropub](https://indieweb.org/Micropub)
 - [Micropub Specification](https://www.w3.org/TR/micropub/)
+
+## Acknowledgements
+
+The emojis.json file that the automatic emoji detection system uses on the /post page was retrieved from [this Gist](https://gist.github.com/harplife/c5fb201e95c9427d976d7bac37ab1e32) by [harplife](https://github.com/harplife/).
+
+## Contributors
+
+- capjamesg

@@ -1,38 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Your user settings</h1>
-<section>
-    <h2>User information</h2>
-    <p>You are signed in as:</p>
-    <code><pre>{{ me.strip("/").replace("https://", "").replace("http://", "") }}</pre></code>
-    <p>Your access token is:</p>
-    <code><pre>{{ user }}</pre></code>
-    {% if syndication != None %}
-    <p>Your posts will be syndicated to:</p>
-    <ul>
-        {% for s in syndication["syndicate-to"] %}
-        <li><a href="{{ s['uid'] }}">{{ s["name"] }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-</section>
-<section>
-    <h2>Bookmarklets</h2>
+<div class="main_content_box">
+    <h1>Your user settings</h1>
+    <section>
+        <h2>User information</h2>
+        <p>You are signed in as:</p>
+        <code><pre>{{ me.strip("/").replace("https://", "").replace("http://", "") }}</pre></code>
+        <p>Your access token is:</p>
+        <code><pre>{{ user }}</pre></code>
+        {% if syndication != None %}
+        <p>Your posts will be syndicated to:</p>
+        <ul>
+            {% for s in syndication["syndicate-to"] %}
+            <li><a href="{{ s['uid'] }}">{{ s["name"] }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </section>
+    <section>
+        <h2>Bookmarklets</h2>
 
-    <p>You can use the bookmarklets below to create responses to web pages by clicking on a link in your bookmarks.</p>
+        <p>You can use the bookmarklets below to create responses to web pages by clicking on a link in your bookmarks.</p>
 
-    <p>Drag the bookmarklets below into your bookmarks on desktop or hold down each link on mobile to add them to your bookmarks.</p>
+        <p>Drag the bookmarklets below into your bookmarks on desktop or hold down each link on mobile to add them to your bookmarks.</p>
 
-    <ul>
-        <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=like&like-of='+encodeURIComponent(window.location.href);})()">Like ❤️</a></li>
-        <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?in-reply-to='+encodeURIComponent(window.location.href);})()">Reply 💬</a></li>
-        <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=bookmark&bookmark='+encodeURIComponent(window.location.href);})()">Bookmark 🔖</a></li>
-        <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=rsvp&rsvp='+encodeURIComponent(window.location.href);})()">RSVP 📅</a></li>
-        <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=repost&repost-of='+encodeURIComponent(window.location.href);})()">Repost 🔁</a></li>
-    </ul>
-</section>
-<section>
-    <h2>Schemas</h2>
-    <a href="/schemas">Click here to see the schemas posted by the client to the server.</a>
-</section>
+        <ul>
+            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=like&like-of='+encodeURIComponent(window.location.href);})()">Like ❤️</a></li>
+            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?in-reply-to='+encodeURIComponent(window.location.href);})()">Reply 💬</a></li>
+            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=bookmark&bookmark='+encodeURIComponent(window.location.href);})()">Bookmark 🔖</a></li>
+            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=rsvp&rsvp='+encodeURIComponent(window.location.href);})()">RSVP 📅</a></li>
+            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=repost&repost-of='+encodeURIComponent(window.location.href);})()">Repost 🔁</a></li>
+        </ul>
+    </section>
+    <section>
+        <h2>Schemas</h2>
+        <a href="/schemas">Click here to see the schemas posted by the client to the server.</a>
+    </section>
+</div>
 {% endblock %}
