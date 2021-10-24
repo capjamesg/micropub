@@ -49,11 +49,12 @@
     <h1>Create a note 📝</h1>
     <p>Use the form below to create a note on your personal website.</p>
     <form action="/post" method="POST" enctype="multipart/form-data">
-        <label for="title">Post title:</label><br>
-        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" required /><br>
-        <label for="content">Post contents (optional):</label><br>
-        <textarea name="content" id="content" rows="20"></textarea><br>
-        {% include "reply_emojis.html" %}
+        <label for="title">Post title (optional):</label><br>
+        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" /><br>
+        <label for="content">Post contents:</label><br>
+        <textarea name="content" id="content" rows="20" required></textarea><br>
+        <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
+        <div id="possible_emojis"></div>
         <label for="photo">Post image (optional):</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -63,6 +64,7 @@
         <label for="is_hidden">Should this note be hidden?</label><br>
         <input type="radio" name="is_hidden" value="yes" checked>yes</input><br>
         <input type="radio" name="is_hidden" value="no">no</input><br>
+        {% include "includes/reply_emojis.html" %}
         <label for="syndication">Select a syndication platform below if you wish to publish your post elsewhere too.</label><br>
         <select name="syndication" id="syndication">
             <option value="none">None</option>
@@ -85,7 +87,9 @@
         <input type="number" name="longitude" id="longitude" step="any" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15"></textarea><br>
-        {% include "reply_emojis.html" %}
+        <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
+        <div id="possible_emojis"></div>
+        {% include "includes/reply_emojis.html" %}
         <label for="photo">Post image (optional):</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -121,7 +125,7 @@
     {% elif post_type == "like" %}
     <h1>Create a like ❤️</h1>
     <p>Use the form below to send a like to a post.</p>
-    {% include "context.html" %}
+    {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="like-of">URL of the post to which you want to send a like:</label><br>
         <input type="url" name="like-of" id="like-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
@@ -134,7 +138,7 @@
     {% elif post_type == "repost" %}
     <h1>Share a link 🔁</h1>
     <p>Use the form below to share a link as a repost.</p>
-    {% include "context.html" %}
+    {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="like-of">URL of the post to share as a repost:</label><br>
         <input type="url" name="repost-of" id="repost-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
@@ -147,7 +151,7 @@
     {% elif post_type == "bookmark" %}
     <h1>Create a bookmark 🔖</h1>
     <p>Use the form below to send a bookmark to a post.</p>
-    {% include "context.html" %}
+    {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="bookmark-of">URL of the post to bookmark:</label><br>
         <input type="url" name="bookmark-of" id="bookmark-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
@@ -178,7 +182,7 @@
         <input type="time" name="event_time" id="event_time" placeholder="12:00" /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15"></textarea><br>
-        {% include "reply_emojis.html" %}
+        {% include "includes/reply_emojis.html" %}
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="RSVP" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -188,15 +192,14 @@
     {% else %}
     <h1>Create a reply 💬</h1>
     <p>Use the form below to create a reply to a post.</p>
-    {% include "context.html" %}
+    {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
         <label for="in-reply-to">URL of the post to which you want to reply:</label><br>
         <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
-        <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
         <div id="possible_emojis"></div>
-        {% include "reply_emojis.html" %}
+        {% include "includes/reply_emojis.html" %}
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
@@ -205,106 +208,5 @@
     </form>
     {% endif %}
 </section>
-<script>
-    var char_count = 0;
-    var last_char = null;
-	var xhr = new XMLHttpRequest();
-
-	xhr.open('GET', '/emojis.json');
-
-	xhr.send();
-        var emoji_names = [];
-        var emojis = [];
-
-	xhr.onload = function() {
-		if (xhr.status === 200) {
-            emoji_req = JSON.parse(xhr.responseText);
-            // split json into two lists
-            for (var i in emoji_req) {
-                emojis.push(i);
-                emoji_names.push(emoji_req[i].toLowerCase().replace(" ", "_"));
-            }
-        }
-    };
-
-    var input = document.getElementById("content");
-    var character_count_element = document.getElementById("character_count");
-
-    input.onkeydown = function(e) {
-        character_count_element.innerHTML = input.value.length;
-
-        if (e.keyCode == 16) {
-            last_char = e.keyCode;
-        } else if (e.keyCode == 221) {
-            last_char = e.keyCode;
-        }
-
-        if (last_char == 16) {
-            var possible_emojis = document.getElementById("possible_emojis");
-            var last_index = input.value.lastIndexOf(":");
-            // get substring from last index to end
-            var user_input_emoji_name = input.value.substring(input.value.lastIndexOf(":") + 1, input.value.length);
-
-            if (user_input_emoji_name.length + 1 > 3) {
-                var valid_emojis_to_show = emoji_names.map(function(emoji_name) {
-                    if (emoji_name.startsWith(user_input_emoji_name)) {
-                        return emoji_name + " (" + emojis[emoji_names.indexOf(emoji_name)] + ")"
-                    }
-                });
-
-                possible_emojis.innerHTML = "<ul>";
-
-                for (var i in valid_emojis_to_show) {
-                    possible_emojis.innerHTML += "<li>" + valid_emojis_to_show[i] + "</li>";
-                }
-            }
-            
-            if (e.keyCode == 32) {
-                // if value in emoji
-                // get last index of :
-                var last_index = input.value.lastIndexOf(":");
-                // get substring from last index to end
-                var user_emoji_name = input.value.substring(last_index + 1);
-                
-                var valid_emojis_to_show = emoji_names.map(function(emoji_name, index) {
-                    if (emoji_name.startsWith(user_emoji_name)) {
-                        return emojis[index];
-                    }
-                });
-
-                valid_emojis_to_show = valid_emojis_to_show.filter(item => item != undefined);
-
-                console.log(valid_emojis_to_show)
-                
-                if (valid_emojis_to_show.length > 0) {
-                    input.value = input.value += valid_emojis_to_show[0];
-                    input.value = input.value.replace(":" + user_emoji_name, "");
-                    var possible_emojis = document.getElementById("possible_emojis");
-                    possible_emojis.innerHTML = "";
-                }
-            }
-        } else if (last_char == 221) {
-            var last_index = input.value.lastIndexOf("[]");
-            // get substring from last index to end
-            var link = input.value.substring(last_index + 2, input.value.length);
-
-            if (e.keyCode == 32) {
-                input.value = input.value.replace("[]" + link, "<a href='https://" + link + "'>" + link + "</a>");
-            }
-        } else if (last_char == 32) {
-            last_char = null;
-        }
-    }
-
-    function add_emoji(emoji) {
-        var url = document.getElementById("in-reply-to").value;
-        if (emoji == "🪀") {
-            emoji = "<a href='" + url + "' class='u-yo-of'>Yo! 🪀</a>"
-        } else if (emoji == "👉") {
-            emoji = "<a href='" + url + "' class='u-poke-of'>Poke 👉</a>"
-        }
-        char_count++;
-        input.value += emoji;
-    }
-</script>
+<script src="/emoji_autocomplete.js"></script>
 {% endblock %}

@@ -8,12 +8,18 @@
         {% endif %}
     </div>
     <div class="e-content webmention-content flex_right_home">
+        {% if h_entry.get("post_photo_url") %}
+            <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo">
+        {% endif %}
         <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
     </div>
 </section>
 {% elif h_entry and h_entry.get('post_body') %}
 <section class="context">
     <h3>{% if h_entry.get("p-name") %}{{ h_entry.get("p-name") }}{% endif %}</h3>
+    {% if h_entry.get("post_photo_url") %}
+        <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo">
+    {% endif %}
     <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
     {% if h_entry.get('author_name') %}
         <p>Written by <a href="{{ h_entry.get('author_url') }}" class="u-url p-name">{{ h_entry.get('author_name') }}</a></p>

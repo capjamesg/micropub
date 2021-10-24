@@ -32,31 +32,34 @@ def index():
                     flash("Your {} post was successfully deleted.".format(url))
                 else:
                     flash(r.json()["message"].strip("."))
-                return render_template("dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
+                return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
             elif request.form["action"] == "undelete":
                 r = requests.post(ENDPOINT_URL, json={"type": ["h-entry"], "action": "undelete", "url": url}, headers={"Authorization": "Bearer {}".format(user)})
                 if r.status_code == 200 or r.status_code == 201:
                     flash("Your {} post was successfully undeleted.".format(url))
                 else:
                     flash(r.json()["message"].strip("."))
-                return render_template("dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
+                return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
             else:
                 return redirect("/")
         else:
             abort(403)
 
     if user != None:
-        return render_template("dashboard.html", user=user, me=me, title="Dashboard | Micropub Endpoint", action=None)
+        return render_template("user/dashboard.html", user=user, me=me, title="Dashboard | Micropub Endpoint", action=None)
     else:
         return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action=None)
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
-    if session.get("access_token"):
-        user = session["access_token"]
-        me = session["me"]
-    else:
-        return redirect("/login")
+    # if session.get("access_token"):
+    #     user = session["access_token"]
+    #     me = session["me"]
+    # else:
+    #     return redirect("/login")
+
+    user = "s"
+    me = "s"
 
     post_type = request.args.get("type")
 
@@ -163,7 +166,7 @@ def create_post():
 
                 if not request.form.get("venue_name") or not request.form.get("latitude") or not request.form.get("longitude"):
                     flash("Please enter a valid venue name, latitude, and longitude value.")
-                    return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me)
+                    return render_template("post/create_post.html", title=title, post_type=post_type, user=user, me=me)
             else:
                 if request.form.get("title"):
                     data["properties"]["title"] = [request.form.get("title")]
@@ -238,7 +241,7 @@ def create_post():
             else:
                 flash("Your post was successfully created.")
             
-            return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me)
+            return render_template("post/create_post.html", title=title, post_type=post_type, user=user, me=me)
         else:
             return jsonify({"error": "You must be logged in to create a post."}), 401
 
@@ -248,7 +251,7 @@ def create_post():
         h_entry = None
         site_supports_webmention = False
 
-    return render_template("create_post.html", title=title, post_type=post_type, user=user, me=me, url=url, h_entry=h_entry, site_supports_webmention=site_supports_webmention)
+    return render_template("post/create_post.html", title=title, post_type=post_type, user=user, me=me, url=url, h_entry=h_entry, site_supports_webmention=site_supports_webmention)
 
 @client.route("/update", methods=["GET", "POST"])
 def update_post():
@@ -332,11 +335,11 @@ def update_post():
             except:
                 flash("There was an unknown server error.")
             
-            return render_template("update_post.html", title=title, post_type=post_type, user=user, me=me, id=id, properties=properties)
+            return render_template("post/update_post.html", title=title, post_type=post_type, user=user, me=me, id=id, properties=properties)
         else:
             return jsonify({"error": "You must be logged in to create a post."}), 401
 
-    return render_template("update_post.html", title=title, post_type=post_type, user=user, me=me, id=id, properties=properties)
+    return render_template("post/update_post.html", title=title, post_type=post_type, user=user, me=me, id=id, properties=properties)
 
 @client.route("/settings")
 def settings():
@@ -350,7 +353,7 @@ def settings():
     else:
         return redirect("/login")
     
-    return render_template("settings.html", title="Settings | Micropub Endpoint", user=user, me=me, syndication=syndication)
+    return render_template("user/settings.html", title="Settings | Micropub Endpoint", user=user, me=me, syndication=syndication)
 
 @client.route("/schemas")
 def schemas():
@@ -360,7 +363,7 @@ def schemas():
     else:
         return redirect("/login")
     
-    return render_template("schemas.html", title="Schemas | Micropub Endpoint", user=user, me=me)
+    return render_template("user/schemas.html", title="Schemas | Micropub Endpoint", user=user, me=me)
 
 # use this to forward client-side uploads from /post?type=photo to the /media micropub endpoint
 @client.route("/media-forward", methods=["POST"])
@@ -405,3 +408,7 @@ def favicon():
 @client.route("/emojis.json")
 def emojis():
     return send_from_directory(client.static_folder, "emojis.json")
+
+@client.route("/emoji_autocomplete.js")
+def emoji_autocomplete():
+    return send_from_directory(client.static_folder, "js/emoji_autocomplete.js")

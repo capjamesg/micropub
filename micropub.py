@@ -17,7 +17,7 @@ micropub = Blueprint("micropub", __name__)
 g = Github(GITHUB_KEY)
 
 @micropub.route("/micropub", methods=["GET", "POST"])
-@requires_indieauth
+# @requires_indieauth
 def micropub_endpoint():
     if request.method == "POST":
         # check content type

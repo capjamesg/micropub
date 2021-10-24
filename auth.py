@@ -46,8 +46,6 @@ def indieauth_callback():
 
     session["me"] = r.json().get("me")
     session["access_token"] = r.json().get("access_token")
-
-    print(session)
         
     try:
         soup = BeautifulSoup(r.json().get("me"), "html.parser")
@@ -119,4 +117,4 @@ def discover_auth_endpoint():
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("auth.html", title="Micropub Dashboard Login")
+    return render_template("user/auth.html", title="Micropub Dashboard Login")

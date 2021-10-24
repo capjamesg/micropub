@@ -1,7 +1,22 @@
 from bs4 import BeautifulSoup
+from requests.api import post
 from .config import TWITTER_BEARER_TOKEN
 import requests
 import mf2py
+
+def canonicalize_url(url, domain, full_url=None):
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    elif url.startswith("//"):
+        return "https:" + domain.strip() + "/" + url
+    elif url.startswith("/"):
+        return "https://" + domain.strip() + "/" + url
+    elif url.startswith("./"):
+        return full_url + url.replace(".", "")
+    elif url.startswith("../"):
+        return "https://" + domain.strip() + "/" + url[3:]
+    else:
+        return "https://" + url
 
 def get_reply_context(url, request_type):
     h_entry = None
@@ -82,7 +97,22 @@ def get_reply_context(url, request_type):
             if not author_name and author_url:
                 author_name = author_url.split("/")[2]
 
+            post_photo_url = None
+
+            if h_entry["properties"].get("photo"):
+                post_photo_url = canonicalize_url(h_entry["properties"]["photo"][0], domain, url)
+
+            # look for featured image to display in reply context
+            if post_photo_url == None:
+                if soup.find("meta", property="og:image") and soup.find("meta", property="og:image")["content"]:
+                    post_photo_url = soup.find("meta", property="og:image")["content"]
+                elif soup.find("meta", property="twitter:image") and soup.find("meta", property="twitter:image")["content"]:
+                    post_photo_url = soup.find("meta", property="twitter:image")["content"]
+
             h_entry = {"author_image": author_image, "author_url": author_url, "author_name": author_name, "post_body": post_body, "p-name": p_name}
+
+            if post_photo_url:
+                h_entry["post_photo_url"] = post_photo_url
 
             return h_entry, site_supports_webmention
 
@@ -128,8 +158,6 @@ def get_reply_context(url, request_type):
 
             if r and r.status_code != 200:
                 return {}, None
-
-            print(r.json()["data"].keys())
 
             get_author = requests.get("https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")), headers=headers)
 
@@ -178,8 +206,15 @@ def get_reply_context(url, request_type):
             else:
                 p_tag = ""
 
+        post_photo_url = None
+
+        # look for featured image to display in reply context
         if soup.select('.u-photo'):
-            photo_url = soup.select('.u-photo')[0]['src']
+            post_photo_url = soup.select('.u-photo')[0]['src']
+        elif soup.find("meta", property="og:image") and soup.find("meta", property="og:image")["content"]:
+            post_photo_url = soup.find("meta", property="og:image")["content"]
+        elif soup.find("meta", property="twitter:image") and soup.find("meta", property="twitter:image")["content"]:
+            post_photo_url = soup.find("meta", property="twitter:image")["content"]
             
         favicon = soup.find("link", rel="icon")
 
@@ -194,6 +229,11 @@ def get_reply_context(url, request_type):
             author_url = "https://" + domain
 
         h_entry = {"p-name": page_title, "post_body": p_tag, "author_image": photo_url, "author_url": "https://" + domain, "author_name": domain}
+
+        if post_photo_url:
+            h_entry["post_photo_url"] = post_photo_url
+
+        print(h_entry)
 
         return h_entry, site_supports_webmention
 
