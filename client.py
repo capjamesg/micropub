@@ -52,14 +52,11 @@ def index():
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
-    # if session.get("access_token"):
-    #     user = session["access_token"]
-    #     me = session["me"]
-    # else:
-    #     return redirect("/login")
-
-    user = "s"
-    me = "s"
+    if session.get("access_token"):
+        user = session["access_token"]
+        me = session["me"]
+    else:
+        return redirect("/login")
 
     post_type = request.args.get("type")
 
@@ -381,9 +378,9 @@ def forward_media_query():
         return jsonify({"error": "You must be logged in to upload a photo."}), 401
     
     if request.form.get("filename"):
-        filename = secure_filename(request.form.get("filename"))
+        filename = secure_filename(request.form.get("filename").replace(".", ""))
     else:
-        filename = secure_filename(photo.filename)
+        filename = secure_filename(photo.filename.replace(".", ""))
 
     photo.save(os.path.join(UPLOAD_FOLDER, filename))
 

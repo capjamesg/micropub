@@ -44,10 +44,12 @@ input.onkeydown = function(e) {
                 }
             });
 
-            possible_emojis.innerHTML = "<ul>";
+            valid_emojis_to_show = valid_emojis_to_show.filter(item => item != undefined);
+
+            possible_emojis.innerHTML = "<h3>Suggested Emojis</h3>";
 
             for (var i in valid_emojis_to_show) {
-                possible_emojis.innerHTML += "<li>" + valid_emojis_to_show[i] + "</li>";
+                possible_emojis.innerHTML += "<p>" + valid_emojis_to_show[i] + "</p>";
             }
         }
         
@@ -66,7 +68,16 @@ input.onkeydown = function(e) {
 
             valid_emojis_to_show = valid_emojis_to_show.filter(item => item != undefined);
 
-            console.log(valid_emojis_to_show)
+            var exact_match = valid_emojis_to_show.filter(item => item == user_emoji_name);
+
+            console.log(exact_match);
+
+            if (exact_match.length == 1) {
+                input.value = input.value += exact_match[0];
+                input.value = input.value.replace(":" + exact_match, "");
+                var possible_emojis = document.getElementById("possible_emojis");
+                possible_emojis.innerHTML = "";
+            }
             
             if (valid_emojis_to_show.length > 0) {
                 input.value = input.value += valid_emojis_to_show[0];

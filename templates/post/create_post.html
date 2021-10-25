@@ -39,8 +39,8 @@
     <h1>Upload a photo to your website 📷</h1>
     <p>Use the form below to upload a picture to your website.</p>
     <form action="/media-forward" method="POST" enctype="multipart/form-data">
-        <label for="filename">File Name (optional):</label>
-        <input type="text" name="filename" id="filename" placeholder="indieweb_photo.png" /><br>
+        <label for="filename">File Name (optional, no extension needed):</label>
+        <input type="text" name="filename" id="filename" placeholder="indieweb_photo" /><br>
         <label for="photo">Post image:</label><br>
         <input type="file" name="photo" id="photo" accept="image/*"><br>
         <input type="submit" value="Submit image">
@@ -198,6 +198,7 @@
         <input type="url" name="in-reply-to" id="in-reply-to" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
+        <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
         <div id="possible_emojis"></div>
         {% include "includes/reply_emojis.html" %}
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
