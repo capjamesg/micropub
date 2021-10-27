@@ -44,8 +44,13 @@ def indieauth_callback():
         flash("Your domain is not allowed to access this website.")
         return redirect("/login")
 
+    if "create" not in r.json().get("scope").split(" "):
+        flash("This application needs the 'create' scope to work. Please log in again and grant the 'create' scope.")
+        return redirect("/login")
+
     session["me"] = r.json().get("me")
     session["access_token"] = r.json().get("access_token")
+    session["scopes"] = r.json().get("scope")
         
     try:
         soup = BeautifulSoup(r.json().get("me"), "html.parser")

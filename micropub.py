@@ -23,6 +23,8 @@ def micropub_endpoint():
         # check content type
         if not request.headers["Content-Type"].startswith("multipart/form-data") and not request.headers["Content-Type"].startswith("application/x-www-form-urlencoded") and not request.headers["Content-Type"].startswith("application/json"):
             return jsonify({"message": "Please send your request with the Content-Type application/x-www-form-urlencoded, application/json or multipart/form-data."}), 400
+        
+        content = ""
 
         if request.headers["Content-Type"].startswith("application/json"):
             object_type = request.json
@@ -42,6 +44,7 @@ def micropub_endpoint():
                 photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
                 photo_r = requests.post(MEDIA_ENDPOINT_URL, files={"file": (secure_filename(request.files.get("photo").filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(request.files.get("photo").filename)), "rb"), 'image/jpeg')})
                 object_type["photo"] = photo_r.headers.get("Location")
+            content = request.form.get("content")
         else:
             object_type = request.form.to_dict()
 
@@ -60,8 +63,6 @@ def micropub_endpoint():
                 object_type["properties"][item] = [object_type.get(item)]
     
         root_properties = ["p-rsvp", "drank", "checkin"]
-
-        content = ""
 
         if object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == dict:
             content = object_type["properties"].get("content")[0].get("html")

@@ -27,6 +27,10 @@ def index():
             if request.form["action"] == "update":
                 return redirect("/update?url={}".format(url))
             elif request.form["action"] == "delete":
+                if session.get("scopes") and not "delete" in session.get("scopes").split(" "):
+                    flash("You do not have permission to update posts.")
+                    return redirect("/")
+
                 r = requests.post(ENDPOINT_URL, json={"type": ["h-entry"], "action": "delete", "url": url}, headers={"Authorization": "Bearer {}".format(user)})
                 if r.status_code == 200 or r.status_code == 201:
                     flash("Your {} post was successfully deleted.".format(url))
@@ -34,6 +38,9 @@ def index():
                     flash(r.json()["message"].strip("."))
                 return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
             elif request.form["action"] == "undelete":
+                if session.get("scopes") and not "undelete" in session.get("scopes").split(" "):
+                    flash("You do not have permission to undelete posts.")
+                    return redirect("/")
                 r = requests.post(ENDPOINT_URL, json={"type": ["h-entry"], "action": "undelete", "url": url}, headers={"Authorization": "Bearer {}".format(user)})
                 if r.status_code == 200 or r.status_code == 201:
                     flash("Your {} post was successfully undeleted.".format(url))
@@ -92,6 +99,9 @@ def create_post():
         title = "Upload a Photo"
         url = None
         request_type = None
+        if session.get("scope") and "media" not in session.get("scope").split(" "):
+            flash("You need to grant the 'media' scope to upload photos.")
+            return redirect("/")
     else:
         title = "Create a Reply"
         url = request.args.get("in-reply-to")
@@ -259,6 +269,10 @@ def update_post():
         me = session["me"]
     else:
         return redirect("/login")
+
+    if session.get("scopes") and not "update" in session.get("scopes").split(" "):
+        flash("You do not have permission to update posts.")
+        return redirect("/")
 
     if "/checkin/" in id:
         post_type = "checkin"
