@@ -14,13 +14,15 @@
         <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
     </div>
 </section>
-{% elif h_entry and h_entry.get('post_body') %}
+{% elif h_entry and h_entry.get('p-name') %}
 <section class="context">
     <h3>{% if h_entry.get("p-name") %}{{ h_entry.get("p-name") }}{% endif %}</h3>
     {% if h_entry.get("post_photo_url") %}
-        <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo">
+        <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo" style="width: 100%;">
     {% endif %}
+    {% if h_entry.get('post_body') %}
     <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
+    {% endif %}
     {% if h_entry.get('author_name') %}
         <p>Written by <a href="{{ h_entry.get('author_url') }}" class="u-url p-name">{{ h_entry.get('author_name') }}</a></p>
     {% endif %}

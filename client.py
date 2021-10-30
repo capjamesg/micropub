@@ -59,11 +59,14 @@ def index():
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
-    if session.get("access_token"):
-        user = session["access_token"]
-        me = session["me"]
-    else:
-        return redirect("/login")
+    # if session.get("access_token"):
+    #     user = session["access_token"]
+    #     me = session["me"]
+    # else:
+    #     return redirect("/login")
+
+    user = "s"
+    me = "jamesg.blog"
 
     post_type = request.args.get("type")
 
@@ -141,12 +144,6 @@ def create_post():
                 data["syndication"] = [request.form.get("syndication")]
 
             data["properties"] = {}
-
-            if request_type != None and url:
-                h_entry, site_supports_webmention = get_reply_context(url, request_type)
-
-                if h_entry:
-                    data["properties"]["context"] = h_entry
 
             # if roaster or varietals or country
             if request.form.get("drank"):

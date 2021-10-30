@@ -20,7 +20,7 @@ def create_app():
     sess = Session()
     sess.init_app(app)
 
-    from .micropub import micropub as micropub_blueprint
+    from .server.micropub import micropub as micropub_blueprint
 
     app.register_blueprint(micropub_blueprint)
 
@@ -28,7 +28,7 @@ def create_app():
 
     app.register_blueprint(client_blueprint)
 
-    from .auth import auth as auth_blueprint
+    from .auth.auth import auth as auth_blueprint
 
     app.register_blueprint(auth_blueprint)
 

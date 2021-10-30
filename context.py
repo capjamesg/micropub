@@ -174,7 +174,7 @@ def get_reply_context(url, request_type):
 
             return h_entry, site_supports_webmention
 
-        soup = BeautifulSoup(requests.get(url).text, "html.parser")
+        soup = BeautifulSoup(requests.get(url).text, "lxml")
 
         page_title = soup.find("title")
 
@@ -232,8 +232,6 @@ def get_reply_context(url, request_type):
 
         if post_photo_url:
             h_entry["post_photo_url"] = post_photo_url
-
-        print(h_entry)
 
         return h_entry, site_supports_webmention
 
