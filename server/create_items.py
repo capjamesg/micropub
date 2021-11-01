@@ -7,11 +7,11 @@ from github import Github
 from . import colors
 import datetime
 import requests
+import context
 import string
 import random
 import yaml
 import os
-from .. import context
 
 g = Github(GITHUB_KEY)
 

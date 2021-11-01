@@ -1,11 +1,10 @@
 from flask import request, render_template, redirect, session, Blueprint, flash, jsonify, abort, send_from_directory
-from werkzeug.datastructures import Headers
 from werkzeug.utils import secure_filename
+from context import get_reply_context
 from bs4 import BeautifulSoup
 from github import Github
-from .config import *
+from config import *
 import requests
-from .context import get_reply_context
 import os
 
 client = Blueprint("client", __name__, static_folder="static", static_url_path="")

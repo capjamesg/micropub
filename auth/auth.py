@@ -1,5 +1,5 @@
 from flask import request, redirect, session, Blueprint, flash, render_template
-from ..config import ME, CALLBACK_URL, CLIENT_ID
+from config import ME, CALLBACK_URL, CLIENT_ID
 from bs4 import BeautifulSoup
 import requests
 import random

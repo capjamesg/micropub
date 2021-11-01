@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-from requests.api import post
-from .config import TWITTER_BEARER_TOKEN
+from config import TWITTER_BEARER_TOKEN
 import requests
 import mf2py
 

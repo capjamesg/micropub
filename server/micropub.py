@@ -1,11 +1,11 @@
 from flask import jsonify, request, g, Blueprint, abort
 from werkzeug.utils import secure_filename
-from .interactions import interactions
-from ..auth.auth_helpers import verify_user, validate_scope
+from interactions import interactions
+from auth.auth_helpers import verify_user, validate_scope
 from PIL import Image, ImageOps
 from . import create_items
 from github import Github
-from ..config import *
+from config import *
 import requests
 import string
 import random

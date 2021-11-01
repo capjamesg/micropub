@@ -1,4 +1,4 @@
-from ..config import *
+import config
 import os
 
 def check_folder(folder_name, url, get_contents, repo):
