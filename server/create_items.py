@@ -1,4 +1,4 @@
-from ..config import *
+from config import *
 from flask import jsonify
 from werkzeug.utils import secure_filename
 from bs4 import BeautifulSoup
