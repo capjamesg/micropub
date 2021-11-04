@@ -1,17 +1,17 @@
 {% if h_entry and h_entry.get("author_image") and h_entry.get('post_body') %}
-<section class="flex_item context">
-    <div class="u-author h-card" style="flex: 0 10%;">
-        <img src="{{ h_entry.get('author_image') }}" class="webmention-photo special-image" style="width: 40px;" alt="{{ h_entry.get('author_name') }} page icon">
-        <br />
-        {% if h_entry.get('author_name') %}
-        <a href="{{ h_entry.get('author_url') }}">{{ h_entry.get('author_name') }}</a>
-        {% endif %}
-    </div>
+<section class="context">
+    <img src="{{ h_entry.get('author_image') }}" style="width: 40px;" alt="{{ h_entry.get('author_name') }} page icon">
+    <br />
+    {% if h_entry.get('author_name') %}
+    <a href="{{ h_entry.get('author_url') }}">{{ h_entry.get('author_name') }}</a>
+    {% endif %}
     <div class="e-content webmention-content flex_right_home">
+        <h3>{% if h_entry.get("p-name") %}{{ h_entry.get("p-name") }}{% endif %}</h3>
         {% if h_entry.get("post_photo_url") %}
-            <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo">
+            <img src="{{ h_entry.get("post_photo_url") }}" alt="{{ h_entry.get("p-name") }} header photo" style="width: 100%;">
         {% endif %}
         <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
+        <p><a href="{{ url }}">View post</a></p>
     </div>
 </section>
 {% elif h_entry and h_entry.get('p-name') %}
@@ -23,6 +23,7 @@
     {% if h_entry.get('post_body') %}
     <p>{{ " ".join(h_entry.get('post_body').split(" ")[:75]) }}{% if h_entry.get('post_body').split(" ") | length > 75 %}...{% endif %}</p>
     {% endif %}
+    <p><a href="{{ url }}">View post</a></p>
     {% if h_entry.get('author_name') %}
         <p>Written by <a href="{{ h_entry.get('author_url') }}" class="u-url p-name">{{ h_entry.get('author_name') }}</a></p>
     {% endif %}

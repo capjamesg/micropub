@@ -19,7 +19,8 @@ g = Github(GITHUB_KEY)
 @micropub.route("/micropub", methods=["GET", "POST"])
 def micropub_endpoint():
     if request.method == "POST":
-        has_valid_token, scopes = verify_user()
+        scopes = ["create"]
+        has_valid_token, scopes = verify_user(request)
 
         if has_valid_token == False:
             abort(403)

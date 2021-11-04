@@ -5,7 +5,7 @@ def validate_scope(scope, granted_scope_list):
     if scope not in granted_scope_list:
         abort(403)
 
-def get_access_token():
+def get_access_token(request):
     access_token = request.headers.get('Authorization')
 
     if access_token:
@@ -19,13 +19,13 @@ def get_access_token():
 
     return access_token
 
-def verify_user():
-    access_token = get_access_token()
+def verify_user(request):
+    access_token = get_access_token(request)
     if not access_token:
         return False, []
 
     r = requests.get(
-        session.get("token_endpoint"),
+        "https://auth.jamesg.blog/token",
         headers={'Authorization': 'Bearer ' + access_token}
     )
     if r.status_code == 200:
