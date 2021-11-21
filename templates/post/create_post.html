@@ -139,7 +139,12 @@
         <input type="hidden" name="category" id="category" value="Like" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit like">
+        {% if not url %}
+            <input type="hidden" name="preview" id="preview" value="true" required />
+        {% endif %}
+        {% else %}
+            <input type="submit" value="Submit like">
+        {% endif %}
     </form>
     {% elif post_type == "repost" %}
     <h1>Share a link 🔁</h1>
@@ -152,7 +157,11 @@
         <input type="hidden" name="category" id="category" value="Repost" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit repost">
+        {% if not url %}
+            <input type="hidden" name="preview" id="preview" value="true" required />
+        {% else %}
+            <input type="submit" value="Submit repost">
+        {% endif %}
     </form>
     {% elif post_type == "bookmark" %}
     <h1>Create a bookmark 🔖</h1>
@@ -165,7 +174,12 @@
         <input type="hidden" name="category" id="category" value="Bookmark" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit bookmark">
+        {% if not url %}
+            <input type="hidden" name="preview" id="preview" value="true" required />
+            <input type="submit" value="Preview bookmark">
+        {% else %}
+            <input type="submit" value="Submit bookmark">
+        {% endif %}
     </form>
     {% elif post_type == "rsvp" %}
     <h1>Create an RSVP 📅</h1>
@@ -211,7 +225,12 @@
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit reply">
+        {% if not url %}
+            <input type="hidden" name="preview" id="preview" value="true" required />
+            <input type="submit" value="Preview reply">
+        {% else %}
+            <input type="submit" value="Submit Reply">
+        {% endif %}
     </form>
     {% endif %}
 </section>

@@ -34,7 +34,6 @@ def create_app():
 
     @app.errorhandler(400)
     def request_error(e):
-        print(e)
         if session.get("access_token"):
             user = session["access_token"]
             me = session["me"]

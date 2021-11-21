@@ -23,7 +23,7 @@ def get_reply_context(url, request_type):
     site_supports_webmention = False
 
     if request_type == "like-of" or request_type == "repost-of" or request_type == "bookmark-of" or request_type == "in-reply-to" and (url.startswith("https://") or url.startswith("http://")):
-        parsed = mf2py.parse(requests.get(url, timeout=5, verify=False).text)
+        parsed = mf2py.parse(requests.get(url, timeout=10, verify=False).text)
 
         supports_webmention = requests.get("https://webmention.jamesg.blog/discover?target={}".format(url))
 
@@ -49,7 +49,7 @@ def get_reply_context(url, request_type):
                     if h_entry["properties"].get("author") and h_entry["properties"]["author"][0].startswith("/"):
                         author_url = url.split("/")[0] + "//" + domain + h_entry["properties"].get("author")[0]
 
-                    author = mf2py.parse(requests.get(author_url, timeout=5, verify=False).text)
+                    author = mf2py.parse(requests.get(author_url, timeout=10, verify=False).text)
                     
                     if author["items"] and author["items"][0]["type"] == ["h-card"]:
                         author_url = h_entry['properties']['author'][0]
@@ -153,12 +153,12 @@ def get_reply_context(url, request_type):
             headers = {
                 "Authorization": "Bearer {}".format(TWITTER_BEARER_TOKEN)
             }
-            r = requests.get("https://api.twitter.com/2/tweets/{}?tweet.fields=author_id".format(tweet_uid), headers=headers, timeout=5, verify=False)
+            r = requests.get("https://api.twitter.com/2/tweets/{}?tweet.fields=author_id".format(tweet_uid), headers=headers, timeout=10, verify=False)
 
             if r and r.status_code != 200:
                 return {}, None
 
-            get_author = requests.get("https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")), headers=headers, timeout=5, verify=False)
+            get_author = requests.get("https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")), headers=headers, timeout=10, verify=False)
 
             if get_author and get_author.status_code == 200:
                 photo_url = get_author.json()["data"].get("profile_image_url")

@@ -20,10 +20,10 @@ g = Github(GITHUB_KEY)
 def micropub_endpoint():
     if request.method == "POST":
         scopes = ["create"]
-        has_valid_token, scopes = verify_user(request)
+        # has_valid_token, scopes = verify_user(request)
 
-        if has_valid_token == False:
-            abort(403)
+        # if has_valid_token == False:
+        #     abort(403)
 
         # the "create" scope is required to use the endpoint
         
@@ -57,6 +57,8 @@ def micropub_endpoint():
             content = request.form.get("content")
         else:
             object_type = request.form.to_dict()
+
+        print(request.json)
 
         if object_type.get("access_token"):
             del object_type["access_token"]
