@@ -40,10 +40,12 @@
         <textarea name="content" id="content" rows="20" required>{{ properties.get('properties').get('content')[0] }}</textarea><br>
         {% include "includes/reply_emojis.html" %}
         <div id="possible_emojis"></div>
-        <label for="photo">Post image (optional):</label><br>
-        <input type="file" name="photo" id="photo" accept="image/*"><br>
-        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
-        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+            <label for="photo">Post image (optional):</label><br>
+            <input type="file" name="photo" id="photo" accept="image/*"><br>
+            <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+            <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        {% endif %}
         <label for="category">Post category:</label><br>
         <input type="text" name="category" id="category" placeholder="Note, Coffee..." value="{% for c in properties.get('properties').get('category') %}{{ c }},{% endfor %}" /><br>
         <label for="is_hidden">Should this note be hidden?</label><br>
@@ -66,10 +68,12 @@
         <input type="number" name="longitude" id="longitude" step="any" value="{{ properties.get('properties').get('longitude') }}" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
-        <label for="photo">Post image (optional):</label><br>
-        <input type="file" name="photo" id="photo" accept="image/*"><br>
-        <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
-        <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+            <label for="photo">Post image (optional):</label><br>
+            <input type="file" name="photo" id="photo" accept="image/*"><br>
+            <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
+            <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
+        {% endif %}
         <label for="is_hidden">Should this checkin be hidden?</label><br>
         <input type="radio" name="is_hidden" value="yes" {% if properties.get('properties').get('is_hidden') == "yes" %}checked{% endif %}>yes</input><br>
         <input type="radio" name="is_hidden" value="no" {% if properties.get('properties').get('is_hidden') == "no" %}checked{% endif %}>no</input><br>
