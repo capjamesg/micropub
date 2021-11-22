@@ -102,7 +102,7 @@ def create_post():
         title = "Upload a Photo"
         url = None
         request_type = None
-        if session.get("scope") and "media" not in session.get("scope").split(" "):
+        if session.get("scopes") and "media" not in session.get("scopes").split(" "):
             flash("You need to grant the 'media' scope to upload photos.")
             return redirect("/")
     else:

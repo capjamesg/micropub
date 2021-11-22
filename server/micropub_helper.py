@@ -10,7 +10,7 @@ def check_folder(folder_name, url, get_contents, repo):
                 contents = file.read()
 
         if get_contents == True:
-            repo_file_contents = repo.get_contents("{}/{}.md".format(folder_name, url), ref="master")
+            repo_file_contents = repo.get_contents("{}/{}.md".format(folder_name, url), ref="main")
         else:
             repo_file_contents = None
 

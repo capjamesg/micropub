@@ -233,7 +233,7 @@ def media_endpoint():
         repo = g.get_repo("capjamesg/jamesg.blog")
 
         with open(os.path.join(UPLOAD_FOLDER, filename), "rb") as image_file:
-            repo.create_file("assets/" + filename, "create image for micropub client", image_file.read(), branch="master")
+            repo.create_file("assets/" + filename, "create image for micropub client", image_file.read(), branch="main")
 
         resp = jsonify({"message": "Created"})
         resp.headers["Location"] = "https://jamesg.blog/assets/{}".format(filename)

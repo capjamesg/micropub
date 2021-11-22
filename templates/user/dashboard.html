@@ -25,12 +25,12 @@
                 <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
                 <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
                 <li><a href="/post?type=repost">Share a link 🔁</a></li>
-                {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
+                {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
                     <li><a href="/post?type=photo">Upload a photo 📷</a></li>
                 {% endif %}
             </ul>
         </section>
-        {% if session.get("scope") and "update" in session.get("scope").split(" ") %}
+        {% if session.get("scopes") and "update" in session.get("scopes").split(" ") %}
             <section class="box">
                 <h2>Update a post</h2>
                 <p>You can update a drinking post or reply you have already created.</p>
@@ -42,7 +42,7 @@
                 </form>
             </section>
         {% endif %}
-        {% if session.get("scope") and "delete" in session.get("scope").split(" ") %}
+        {% if session.get("scopes") and "delete" in session.get("scopes").split(" ") %}
             <section class="box">
                 <h2>Delete a post</h2>
                 <p>You can delete a drinking post, reply, or like.</p>
@@ -54,7 +54,7 @@
                 </form>
             </section>
         {% endif %}
-        {% if session.get("scope") and "undelete" in session.get("scope").split(" ") %}
+        {% if session.get("scopes") and "undelete" in session.get("scopes").split(" ") %}
             <section class="box">
                 <h2>Undelete a post</h2>
                 <p>You can delete any post you have created.</p>

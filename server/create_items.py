@@ -163,7 +163,7 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write(content)
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="master")
+        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="main")
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)
@@ -182,7 +182,7 @@ def undelete_post(repo, url):
     if contents == None and folder == None:
         return jsonify({"message": "The post you tried to undelete does not exist."}), 404
 
-    repo.create_file(folder + "/" + url + ".md", "undelete post from micropub server", contents, branch="master")
+    repo.create_file(folder + "/" + url + ".md", "undelete post from micropub server", contents, branch="main")
 
     return jsonify({"message": "Post undeleted."}), 200
 
@@ -203,7 +203,7 @@ def delete_post(repo, url):
 
     contents = repo.get_contents(folder + "/" + url + ".md")
     
-    repo.delete_file(contents.path, "remove post via micropub", contents.sha, branch="master")
+    repo.delete_file(contents.path, "remove post via micropub", contents.sha, branch="main")
 
     return jsonify({"message": "Post deleted."}), 200
 
@@ -277,7 +277,7 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
         file.write(full_contents_for_writing)
 
     with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
-        repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="master")
+        repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="main")
 
     resp = jsonify({"message": "Post updated."})
     resp.headers["Location"] = original_url
