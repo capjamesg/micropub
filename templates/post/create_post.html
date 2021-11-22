@@ -130,6 +130,9 @@
     </script>
     {% elif post_type == "like" %}
     <h1>Create a like ❤️</h1>
+    {% if is_previewing == True %}
+    <p class="box">Below is a preview of the context that will be sent along with your post. Submit the form when you are ready to send your reaction to your site.</p>
+    {% endif %}
     <p>Use the form below to send a like to a post.</p>
     {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
@@ -141,13 +144,16 @@
         <input type="hidden" name="action" id="action" value="create" required />
         {% if not url %}
             <input type="hidden" name="preview" id="preview" value="true" required />
-        {% endif %}
+            <input type="submit" value="Preview like">
         {% else %}
             <input type="submit" value="Submit like">
         {% endif %}
     </form>
     {% elif post_type == "repost" %}
     <h1>Share a link 🔁</h1>
+    {% if is_previewing == True %}
+    <p class="box">Below is a preview of the context that will be sent along with your post. Submit the form when you are ready to send your reaction to your site.</p>
+    {% endif %}
     <p>Use the form below to share a link as a repost.</p>
     {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
@@ -159,12 +165,16 @@
         <input type="hidden" name="action" id="action" value="create" required />
         {% if not url %}
             <input type="hidden" name="preview" id="preview" value="true" required />
+            <input type="submit" value="Preview like">
         {% else %}
             <input type="submit" value="Submit repost">
         {% endif %}
     </form>
     {% elif post_type == "bookmark" %}
     <h1>Create a bookmark 🔖</h1>
+    {% if is_previewing == True %}
+    <p class="box">Below is a preview of the context that will be sent along with your post. Submit the form when you are ready to send your reaction to your site.</p>
+    {% endif %}
     <p>Use the form below to send a bookmark to a post.</p>
     {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
@@ -225,12 +235,7 @@
         <input type="hidden" name="category" id="category" value="Webmention" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />
-        {% if not url %}
-            <input type="hidden" name="preview" id="preview" value="true" required />
-            <input type="submit" value="Preview reply">
-        {% else %}
-            <input type="submit" value="Submit Reply">
-        {% endif %}
+        <input type="submit" value="Submit Reply">
     </form>
     {% endif %}
 </section>

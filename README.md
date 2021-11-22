@@ -18,7 +18,20 @@ So far, the receiving end has 30 of the 34 specification requirements in the mic
 
 https://micropub.rocks/implementation-reports/servers/593/qcErwj2OOC2MiSqE6QeU
 
-## Configuration
+## Installation
+
+### Setting up your environment
+
+First, set up a virtual environment:
+
+    python3 -m venv venv
+    source venv/bin/activate
+
+Next, you will need to install the required dependencies for this project. You can do so by running this command:
+
+    pip install -r requirements.txt
+
+### Configuration
 
 To use this endpoint, you need to create a config.py file with the following values:
 
@@ -32,6 +45,10 @@ To use this endpoint, you need to create a config.py file with the following val
     GOOGLE_API_KEY = "GOOGLE_CLOUD_API_KEY"
 
     TWITTER_BEARER_TOKEN = "TWITTER_API_TOKEN"
+
+    ME = "yourdomain.com"
+    CALLBACK_URL = "https://yourdomain.com/micropub/callback"
+    CLIENT_ID = "https://yourdomain.com"
 
 These values are all required for the endpoint to work. UPLOAD_FOLDER and HOME_FOLDER should be where you keep your website assets folder and website root folder, respectively. In my case, UPLOAD_FOLDER points to my /assets/ folder in my Jekyll repository and HOME_FOLDER points to my root folder in my Jekyll repository.
 
@@ -49,6 +66,12 @@ You will also need to create a folder for each post type you want to support. Th
     - _coffee
     - _bookmark
     - _checkin
+
+### Start the application
+
+With the dependencies installed, you can run the application by using this command:
+
+    python3 wsgi.py
 
 ## Client Schemas
 

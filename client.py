@@ -62,11 +62,14 @@ def index():
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
-    if session.get("access_token"):
-        user = session["access_token"]
-        me = session["me"]
-    else:
-        return redirect("/login")
+    # if session.get("access_token"):
+    #     user = session["access_token"]
+    #     me = session["me"]
+    # else:
+    #     return redirect("/login")
+
+    user = "s"
+    me = "jamesg.blog"
 
     post_type = request.args.get("type")
 
@@ -117,7 +120,13 @@ def create_post():
             del form_encoded["access_token"]
 
         if request.form.get("preview") and not request.form.get("in-reply-to"):
-            return redirect("/preview?type={}&{}={}".format(post_type, request_type, url))
+            post_type = None
+            if request.form.get("like-of"):
+                return redirect("/post?type=like&like-of={}&is_previewing=true".format(request.form.get("like-of")))
+            elif request.form.get("bookmark-of"):
+                return redirect("/post?type=bookmark&bookmark-of={}&is_previewing=true".format(request.form.get("bookmark-of")))
+            elif request.form.get("repost-of"):
+                return redirect("/post?type=repost&repost-of={}&is_previewing=true".format(request.form.get("repost-of")))
 
         if me and user:
             data = {
@@ -262,6 +271,11 @@ def create_post():
         h_entry = None
         site_supports_webmention = False
 
+    is_previewing = False
+
+    if request.args.get("is_previewing") and request.args.get("is_previewing") == "true":
+        is_previewing = True
+
     return render_template(
         "post/create_post.html",
         title=title,
@@ -270,7 +284,8 @@ def create_post():
         me=me,
         url=url,
         h_entry=h_entry,
-        site_supports_webmention=site_supports_webmention
+        site_supports_webmention=site_supports_webmention,
+        is_previewing=is_previewing
     )
 
 @client.route("/update", methods=["GET", "POST"])
