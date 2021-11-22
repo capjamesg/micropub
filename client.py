@@ -62,14 +62,11 @@ def index():
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
-    # if session.get("access_token"):
-    #     user = session["access_token"]
-    #     me = session["me"]
-    # else:
-    #     return redirect("/login")
-
-    user = "s"
-    me = "jamesg.blog"
+    if session.get("access_token"):
+        user = session["access_token"]
+        me = session["me"]
+    else:
+        return redirect("/login")
 
     post_type = request.args.get("type")
 
