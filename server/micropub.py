@@ -1,4 +1,4 @@
-from flask import jsonify, request, g, Blueprint, abort
+from flask import jsonify, request, g, Blueprint, abort, session
 from werkzeug.utils import secure_filename
 from interactions import interactions
 from auth.auth_helpers import verify_user, validate_scope
@@ -19,11 +19,10 @@ g = Github(GITHUB_KEY)
 @micropub.route("/micropub", methods=["GET", "POST"])
 def micropub_endpoint():
     if request.method == "POST":
-        scopes = ["create"]
-        # has_valid_token, scopes = verify_user(request)
+        has_valid_token, scopes = verify_user(request)
 
-        # if has_valid_token == False:
-        #     abort(403)
+        if has_valid_token == False:
+            abort(403)
 
         # the "create" scope is required to use the endpoint
         
@@ -195,13 +194,13 @@ def micropub_endpoint():
 
 @micropub.route("/media", methods=["POST"])
 def media_endpoint():
-    has_valid_token, scopes = verify_user()
+    has_valid_token, scopes = verify_user(request)
 
     if has_valid_token == False:
         abort(403)
 
     # the "media" scope is required to use the endpoint
-    
+
     validate_scope("media", scopes)
 
     if request.method == "POST":
