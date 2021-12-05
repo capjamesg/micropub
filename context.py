@@ -97,9 +97,13 @@ def get_reply_context(url, request_type):
                 author_name = author_url.split("/")[2]
 
             post_photo_url = None
+            post_video_url = None
 
             if h_entry["properties"].get("photo"):
                 post_photo_url = canonicalize_url(h_entry["properties"]["photo"][0], domain, url)
+
+            if h_entry["properties"].get("video"):
+                post_video_url = canonicalize_url(h_entry["properties"]["video"][0], domain, url)
 
             # look for featured image to display in reply context
             if post_photo_url == None:
@@ -112,6 +116,9 @@ def get_reply_context(url, request_type):
 
             if post_photo_url:
                 h_entry["post_photo_url"] = post_photo_url
+
+            if post_video_url:
+                h_entry["post_video_url"] = post_video_url
 
             return h_entry, site_supports_webmention
 
