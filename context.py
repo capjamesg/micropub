@@ -165,7 +165,12 @@ def get_reply_context(url, request_type):
             if r and r.status_code != 200:
                 return {}, None
 
-            get_author = requests.get("https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")), headers=headers, timeout=10, verify=False)
+            get_author = requests.get(
+                "https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")),
+                headers=headers,
+                timeout=10,
+                verify=False
+            )
 
             if get_author and get_author.status_code == 200:
                 photo_url = get_author.json()["data"].get("profile_image_url")
@@ -228,6 +233,11 @@ def get_reply_context(url, request_type):
             photo_url = favicon["href"]
             if not photo_url.startswith("https://") and not photo_url.startswith("http://"):
                 photo_url = "https://" + domain + photo_url
+
+            r = requests.get(photo_url, timeout=10, verify=False)
+
+            if r.status_code != 200:
+                photo_url = None
         else:
             photo_url = None
 
