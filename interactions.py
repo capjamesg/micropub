@@ -43,7 +43,7 @@ interactions = {
     },
     "watch": {
         "attribute": "watch",
-        "keyword": "",
+        "keyword": "watched",
         "folder": "_watches",
         "category": "Watch",
         "layout": "social_post"

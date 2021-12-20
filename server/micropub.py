@@ -29,8 +29,12 @@ def micropub_endpoint():
         validate_scope("create", scopes)
 
         # check content type
-        if not request.headers["Content-Type"].startswith("multipart/form-data") and not request.headers["Content-Type"].startswith("application/x-www-form-urlencoded") and not request.headers["Content-Type"].startswith("application/json"):
-            return jsonify({"message": "Please send your request with the Content-Type application/x-www-form-urlencoded, application/json or multipart/form-data."}), 400
+        if not request.headers["Content-Type"].startswith("multipart/form-data") \
+            and not request.headers["Content-Type"].startswith("application/x-www-form-urlencoded") \
+            and not request.headers["Content-Type"].startswith("application/json"):
+
+            return jsonify({"message": "Please send your request with the Content-Type application/x-www-form-urlencoded, \
+                application/json or multipart/form-data."}), 400
         
         content = ""
 
@@ -44,14 +48,22 @@ def micropub_endpoint():
                 photo_list = []
                 for photo in request.files.getlist("photo[]"):
                     photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
-                    photo_r = requests.post(MEDIA_ENDPOINT_URL, files={"file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')})
+                    photo_r = requests.post(MEDIA_ENDPOINT_URL,
+                        files={
+                            "file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')
+                        }
+                    )
                     object_type = request.form.to_dict()
                     photo_list += [photo_r.headers.get("Location")]
                 object_type["photo"] = photo_list
             else:
                 photo = request.files.get("photo")  
                 photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
-                photo_r = requests.post(MEDIA_ENDPOINT_URL, files={"file": (secure_filename(request.files.get("photo").filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(request.files.get("photo").filename)), "rb"), 'image/jpeg')})
+                photo_r = requests.post(MEDIA_ENDPOINT_URL, 
+                    files={
+                        "file": (secure_filename(request.files.get("photo").filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(request.files.get("photo").filename)), "rb"), 'image/jpeg')
+                        }
+                    )
                 object_type["photo"] = photo_r.headers.get("Location")
             content = request.form.get("content")
         else:
@@ -83,7 +95,10 @@ def micropub_endpoint():
             del object_type["properties"]["content"]
 
         for root_property in root_properties:
-            if object_type.get(root_property) and not object_type.get("drank") and object_type[root_property]["properties"].get("content") and type(object_type[root_property]["properties"].get("content")[0]) == str:
+            if object_type.get(root_property) and not object_type.get("drank") \
+                and object_type[root_property]["properties"].get("content") \
+                and type(object_type[root_property]["properties"].get("content")[0]) == str:
+
                 content = object_type[root_property]["properties"].get("content")[0]
                 del object_type[root_property]["properties"]["content"]
             elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
@@ -125,6 +140,22 @@ def micropub_endpoint():
         else:
             action = "create"
 
+        object_types = (
+            ("p-rsvp", "rsvp"),
+            ("in-reply-to", "webmention"),
+            ("like-of", "like"),
+            ("repost-of", "repost"),
+            ("bookmark-of", "bookmark"),
+            ("drank", "coffee"),
+            ("watch-of", "watch")
+        )
+
+        for item in object_types:
+            property_value, interaction_name = item
+
+            if object_type.get(property_value):
+                return create_items.process_social(repo, front_matter, interactions.get(interaction_name), content)
+
         if action == "delete":
             validate_scope("delete", scopes)
             return create_items.delete_post(repo, url)
@@ -134,20 +165,8 @@ def micropub_endpoint():
         elif action == "update":
             validate_scope("update", scopes)
             return create_items.update_post(repo, url, front_matter, content)
-        if object_type.get("p-rsvp"):
-            return create_items.process_social(repo, front_matter, interactions.get("rsvp"))
-        elif object_type.get("in-reply-to"):
-            return create_items.process_social(repo, front_matter, interactions.get("webmention"), content)
-        elif object_type.get("like-of"):
-            return create_items.process_social(repo, front_matter, interactions.get("like"))
-        elif object_type.get("repost-of"):
-            return create_items.process_social(repo, front_matter, interactions.get("repost"))
-        elif object_type.get("bookmark-of"):
-            return create_items.process_social(repo, front_matter, interactions.get("bookmark"))
         elif object_type.get("properties") and object_type.get("properties").get("checkin"):
             return create_items.process_checkin(repo, front_matter, content)
-        if object_type.get("drank"):
-            return create_items.process_social(repo, front_matter, interactions.get("coffee"), content)
         elif post_type == "entry":
             return create_items.process_social(repo, front_matter, interactions.get("note"), content)
         else:
