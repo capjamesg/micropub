@@ -80,10 +80,12 @@ def create_post():
         ("coffee", ""),
         ("checkin", ""),
         ("photo", ""),
-        ("watch")
+        ("watch", "")
     )
 
-    for post, attribute in accepted_post_types:
+    for item in accepted_post_types:
+        post, attribute = item
+
         if post_type == post:
             title = "Create a {} Post | Micropub Endpoint".format(post.title())
             url = request.args.get(attribute)

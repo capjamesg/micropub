@@ -155,8 +155,18 @@
     <h1>Create a Watch Post 🎬</h1>
     <p>Use the form below to create a Watch post.</p>
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
-        <label for="watch-of">URL of the post to which you want to send a like:</label><br>
+        <label for="watch-of">Name of the show or movie:</label><br>
         <input type="text" name="watch-of" id="watch-of" placeholder="Superstore" required /><br>
+        <label for="watch-type">Show type:</label><br>
+        <select name="watch-type" id="watch-type">
+            <option value="show">TV Show</option>
+            <option value="movie">Documentary</option>
+            <option value="movie">Movie</option>
+        </select><br>
+        <label for="rating">Rating (optional):</label><br>
+        <input type="number" name="rating" id="rating" step="any" /><br>
+        <label for="content">Post contents (optional):</label><br>
+        <textarea name="content" id="content" rows="15"></textarea><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Like" required />
         <input type="hidden" name="h" id="h" value="entry" required />
