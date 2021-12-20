@@ -17,12 +17,12 @@ def canonicalize_url(url, domain, full_url=None):
     else:
         return "https://" + url
 
-def get_reply_context(url, request_type):
+def get_reply_context(url):
     h_entry = None
     photo_url = None
     site_supports_webmention = False
 
-    if request_type == "like-of" or request_type == "repost-of" or request_type == "bookmark-of" or request_type == "in-reply-to" and (url.startswith("https://") or url.startswith("http://")):
+    if url.startswith("https://") or url.startswith("http://"):
         parsed = mf2py.parse(requests.get(url, timeout=10, verify=False).text)
 
         supports_webmention = requests.get("https://webmention.jamesg.blog/discover?target={}".format(url))

@@ -151,6 +151,18 @@
             <input type="submit" value="Submit like">
         {% endif %}
     </form>
+    {% elif post_type == "watch" %}
+    <h1>Create a Watch Post 🎬</h1>
+    <p>Use the form below to create a Watch post.</p>
+    <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
+        <label for="watch-of">URL of the post to which you want to send a like:</label><br>
+        <input type="text" name="watch-of" id="watch-of" placeholder="Superstore" required /><br>
+        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
+        <input type="hidden" name="category" id="category" value="Like" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+        <input type="submit" value="Submit watch post">
+    </form>
     {% elif post_type == "repost" %}
     <h1>Share a link 🔁</h1>
     {% if is_previewing == True %}

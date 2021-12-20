@@ -1,65 +1,42 @@
 from flask import request, redirect, session, Blueprint, flash, render_template
 from config import ME, CALLBACK_URL, CLIENT_ID
-from bs4 import BeautifulSoup
-import requests
+from indieweb_utils import indieauth_callback_handler, discover_endpoints
 import random
 import string
 import hashlib
 import base64
 
-auth = Blueprint("auth", __name__)
+auth = Blueprint('auth', __name__)
 
 @auth.route("/callback")
-def indieauth_callback():
+def indieauth_callback_handler():
     code = request.args.get("code")
     state = request.args.get("state")
 
-    if state != session.get("state"):
-        flash("Your authentication failed. Please try again.")
-        return redirect("/")
+    # these are the scopes necessary for the application to run
+    required_scopes = ["read", "channels"]
 
-    data = {
-        "code": code,
-        "redirect_uri": CALLBACK_URL,
-        "client_id": CLIENT_ID,
-        "grant_type": "authorization_code",
-        "code_verifier": session["code_verifier"]
-    }
+    message, response = indieauth_callback_handler(
+        code,
+        state,
+        session.get("token_endpoint"),
+        session["code_verifier"],
+        session.get("state"),
+        ME,
+        CALLBACK_URL,
+        CLIENT_ID,
+        required_scopes
+    )
 
-    headers = {
-        "Accept": "application/json"
-    }
-
-    r = requests.post(session.get("token_endpoint"), data=data, headers=headers)
-    
-    if r.status_code != 200:
-        flash("There was an error with your token endpoint server.")
+    if message != None:
+        flash(message)
         return redirect("/login")
 
-    # remove code verifier from session because the authentication flow has finished
     session.pop("code_verifier")
 
-    if r.json().get("me").strip("/") != ME.strip("/"):
-        flash("Your domain is not allowed to access this website.")
-        return redirect("/login")
-
-    if "create" not in r.json().get("scope").split(" "):
-        flash("This application needs the 'create' scope to work. Please log in again and grant the 'create' scope.")
-        return redirect("/login")
-
-    session["me"] = r.json().get("me")
-    session["access_token"] = r.json().get("access_token")
-    session["scopes"] = r.json().get("scope")
-        
-    try:
-        soup = BeautifulSoup(r.json().get("me"), "html.parser")
-        mp_endpoint = soup.find("link", attrs={"rel": "micropub"})
-        r = requests.get(mp_endpoint["href"] + "?q=config", headers={"Authorization": "Bearer " + r.json().get("access_token")})
-        session["config"] = r.json()
-        r = requests.get(mp_endpoint["href"] + "?q=syndicate-to", headers={"Authorization": "Bearer " + r.json().get("access_token")})
-        session["syndication"] = r.json()
-    except:
-        pass
+    session["me"] = response.get("me")
+    session["access_token"] = response.get("access_token")
+    session["scope"] = response.get("scope")
 
     return redirect("/")
 
@@ -68,45 +45,44 @@ def logout():
     session.pop("me")
     session.pop("access_token")
 
-    return redirect("/")
+    return redirect("/login")
+
+@auth.route("/login", methods=["GET"])
+def login():
+    return render_template("user/auth.html", title="Microsub Dashboard Login")
 
 @auth.route("/discover", methods=["POST"])
 def discover_auth_endpoint():
     domain = request.form.get("me")
 
-    r = requests.get(domain)
+    headers_to_find = [
+        "authorization_endpoint",
+        "token_endpoint",
+        "micropub",
+        "microsub"
+    ]
 
-    soup = BeautifulSoup(r.text, "html.parser")
+    headers = discover_endpoints(domain, headers_to_find)
 
-    token_endpoint = soup.find("link", rel="token_endpoint")
-
-    authorization_endpoint = soup.find("link", rel="authorization_endpoint")
-
-    if token_endpoint is None:
-        flash("An IndieAuth token endpoint could not be found on your website.")
+    if not headers.get("authorization_endpoint"):
+        flash("A valid IndieAuth authorization endpoint could not be found on your website.")
+        return redirect("/login")
+    
+    if not headers.get("token_endpoint"):
+        flash("A valid IndieAuth token endpoint could not be found on your website.")
         return redirect("/login")
 
-    if not token_endpoint.get("href").startswith("https://") and not token_endpoint.get("href").startswith("http://"):
-        flash("Your IndieAuth token endpoint published on your site must be a full HTTP URL.")
-        return redirect("/login")
+    authorization_endpoint = headers.get("authorization_endpoint")
+    token_endpoint = headers.get("token_endpoint")
 
-    if authorization_endpoint is None:
-        flash("An IndieAuth authorization endpoint could not be found on your website.")
-        return redirect("/login")
-
-    if not authorization_endpoint.get("href").startswith("https://") and not authorization_endpoint.get("href").startswith("http://"):
-        flash("Your IndieAuth authorization endpoint published on your site must be a full HTTP URL.")
-        return redirect("/login")
-
-    token_endpoint = token_endpoint["href"]
-
-    session["token_endpoint"] = token_endpoint
-
-    session["authorization_endpoint"] = authorization_endpoint["href"]
+    session["micropub_url"] = headers.get("micropub")
+    session["server_url"] = headers.get("microsub")
 
     random_code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(30))
 
     session["code_verifier"] = random_code
+    session["authorization_endpoint"] = authorization_endpoint
+    session["token_endpoint"] = token_endpoint
 
     sha256_code = hashlib.sha256(random_code.encode('utf-8')).hexdigest()
 
@@ -116,8 +92,9 @@ def discover_auth_endpoint():
 
     session["state"] = state
 
-    return redirect(authorization_endpoint["href"] + "?client_id=" + CLIENT_ID + "&redirect_uri=" + CALLBACK_URL + "&scope=create update delete media undelete profile&response_type=code&code_challenge=" + code_challenge + "&code_challenge_method=S256&state=" + state)
-
-@auth.route("/login", methods=["GET", "POST"])
-def login():
-    return render_template("user/auth.html", title="Micropub Dashboard Login")
+    return redirect(
+        authorization_endpoint + "?client_id=" +
+        CLIENT_ID + "&redirect_uri=" +
+        CALLBACK_URL + "&scope=read follow mute block channels create&response_type=code&code_challenge=" +
+        code_challenge + "&code_challenge_method=S256&state=" + state
+    )

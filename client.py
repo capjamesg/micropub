@@ -70,45 +70,28 @@ def create_post():
 
     post_type = request.args.get("type")
 
-    if post_type == "coffee":
-        title = "Create a Coffee Post"
-        url = None
-        request_type = None
-    elif post_type == "note":
-        title = "Create a Note"
-        url = None
-        request_type = None
-    elif post_type == "like":
-        title = "Create a Like"
-        url = request.args.get("like-of")
-        request_type = "like-of"
-    elif post_type == "repost":
-        title = "Create a Repost"
-        url = request.args.get("repost-of")
-        request_type = "repost-of"
-    elif post_type == "rsvp":
-        title = "Create a RSVP"
-        url = request.args.get("rsvp")
-        request_type = None
-    elif post_type == "bookmark":
-        title = "Create a Bookmark"
-        url = request.args.get("bookmark")
-        request_type = "bookmark-of"
-    elif post_type == "checkin":
-        title = "Create a checkin"
-        url = None
-        request_type = None
-    elif post_type == "photo":
-        title = "Upload a Photo"
-        url = None
-        request_type = None
-        if session.get("scopes") and "media" not in session.get("scopes").split(" "):
-            flash("You need to grant the 'media' scope to upload photos.")
-            return redirect("/")
-    else:
-        title = "Create a Reply"
-        url = request.args.get("in-reply-to")
-        request_type = "in-reply-to"
+    accepted_post_types = (
+        ("like", "like-of"),
+        ("repost", "repost-of"),
+        ("bookmark", "bookmark-of"),
+        ("rsvp", "rsvp"),
+        ("reply", "in-reply-to"),
+        ("checkin", ""),
+        ("coffee", ""),
+        ("checkin", ""),
+        ("photo", ""),
+        ("watch")
+    )
+
+    for post, attribute in accepted_post_types:
+        if post_type == post:
+            title = "Create a {} Post | Micropub Endpoint".format(post.title())
+            url = request.args.get(attribute)
+            request_type = attribute
+
+    if post_type == "photo" and session.get("scopes") and "media" not in session.get("scopes").split(" "):
+        flash("You need to grant the 'media' scope to upload photos.")
+        return redirect("/")
 
     if request.method == "POST":
         form_encoded = request.form.to_dict()
@@ -129,26 +112,15 @@ def create_post():
             data = {
                 "type": ["h-entry"],
             }
-            
-            if request.form.get("in-reply-to"):
-                data["in-reply-to"] = [request.form.get("in-reply-to")]
-                url = request.form.get("in-reply-to")
-                request_type = "in-reply-to"
-            
-            if request.form.get("like-of"):
-                data["like-of"] = [request.form.get("like-of")]
-                url = request.form.get("like-of")
-                request_type = "like-of"
-            
-            if request.form.get("repost-of"):
-                data["repost-of"] = [request.form.get("repost-of")]
-                url = request.form.get("repost-of")
-                request_type = "repost-of"
-            
-            if request.form.get("bookmark-of"):
-                data["bookmark-of"] = [request.form.get("bookmark-of")]
-                url = request.form.get("bookmark-of")
-                request_type = "bookmark-of"
+
+            form_types = ["in-reply-to", "like-of", "repost-of", "bookmark-of"]
+
+            for key in form_encoded:
+                if key in form_types:
+                    data[key] = [form_encoded[key]]
+                    url = form_encoded[key]
+                    request_type = key
+                    break
 
             if request.form.get("syndication") and request.form.get("syndication") != "none":
                 data["syndication"] = [request.form.get("syndication")]
@@ -158,14 +130,16 @@ def create_post():
             # if roaster or varietals or country
             if request.form.get("drank"):
                 data["drank"] = [{
-                        "properties": {
-                            "title": [request.form.get("title")],
-                            "content": [request.form.get("content")],
-                            "category": request.form.get("category").split(", ")
-                        }
-                    }]
-                data["drank"][0]["properties"]["coffee_info"] = {}
-                if request.form.get("content") and BeautifulSoup(request.form.get("content"), "lxml") and BeautifulSoup(request.form.get("content"), "lxml").find():
+                    "properties": {
+                        "title": [request.form.get("title")],
+                        "content": [request.form.get("content")],
+                        "category": request.form.get("category").split(", "),
+                        "coffee_info": {}
+                    }
+                }]
+                if request.form.get("content") and BeautifulSoup(request.form.get("content"), "lxml") \
+                    and BeautifulSoup(request.form.get("content"), "lxml").find():
+
                     data["drank"][0]["properties"]["content"] = [{"html": request.form.get("content")}]
             elif request.form.get("category") == "RSVP":
                 data["p-rsvp"] = {}
@@ -179,9 +153,19 @@ def create_post():
                 }
             elif request.form.get("venue_name"):
                 data["properties"] = {"checkin": [{"properties": {}}]}
-                data["properties"]["checkin"][0]["properties"]["name"] = [request.form.get("venue_name")]
-                data["properties"]["checkin"][0]["properties"]["latitude"] = [request.form.get("latitude")]
-                data["properties"]["checkin"][0]["properties"]["longitude"] = [request.form.get("longitude")]
+
+                data["properties"] = {
+                    "checkin": [
+                        {
+                            "properties": {
+                                "name": request.form.get("venue_name"),
+                                "latitude": request.form.get("latitude"),
+                                "longitude": request.form.get("longitude")
+                            }
+                        }
+                    ]
+                }
+
                 if request.form.get("content"):
                     data["properties"]["checkin"][0]["properties"]["content"] = [request.form.get("content")]
 
@@ -405,7 +389,13 @@ def settings():
     else:
         return redirect("/login")
     
-    return render_template("user/settings.html", title="Settings | Micropub Endpoint", user=user, me=me, syndication=syndication)
+    return render_template(
+        "user/settings.html",
+        title="Settings | Micropub Endpoint",
+        user=user,
+        me=me,
+        syndication=syndication
+    )
 
 @client.route("/schemas")
 def schemas():
@@ -415,7 +405,12 @@ def schemas():
     else:
         return redirect("/login")
     
-    return render_template("user/schemas.html", title="Schemas | Micropub Endpoint", user=user, me=me)
+    return render_template(
+        "user/schemas.html",
+        title="Schemas | Micropub Endpoint",
+        user=user,
+        me=me
+    )
 
 # use this to forward client-side uploads from /post?type=photo to the /media micropub endpoint
 @client.route("/media-forward", methods=["POST"])

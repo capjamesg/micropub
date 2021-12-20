@@ -2,8 +2,8 @@ import config
 import os
 
 def check_folder(folder_name, url, get_contents, repo):
-    if os.path.exists(HOME_FOLDER + "{}/{}.md".format(folder_name, url)):
-        with open(HOME_FOLDER + "{}/{}.md".format(folder_name, url), "r") as file:
+    if os.path.exists(config.HOME_FOLDER + "{}/{}.md".format(folder_name, url)):
+        with open(config.HOME_FOLDER + "{}/{}.md".format(folder_name, url), "r") as file:
             if get_contents == True:
                 contents = file.readlines()
             else:
