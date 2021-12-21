@@ -37,7 +37,7 @@ def process_social(repo, front_matter, interaction, content=None):
             title = target.replace("https://", "").replace("http://", "")
 
     if target:
-        h_entry, _ = context.get_reply_context(target, interaction.get("attribute"))
+        h_entry, _ = context.get_reply_context(target)
 
         if h_entry:
             json_content["context"] = h_entry

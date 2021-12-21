@@ -25,11 +25,11 @@
         <p>Drag the bookmarklets below into your bookmarks on desktop or hold down each link on mobile to add them to your bookmarks.</p>
 
         <ul>
-            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=like&like-of='+encodeURIComponent(window.location.href);})()">Like ❤️</a></li>
-            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?in-reply-to='+encodeURIComponent(window.location.href);})()">Reply 💬</a></li>
-            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=bookmark&bookmark='+encodeURIComponent(window.location.href);})()">Bookmark 🔖</a></li>
-            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=rsvp&rsvp='+encodeURIComponent(window.location.href);})()">RSVP 📅</a></li>
-            <li><a href="javascript:(function(){window.location='https://micropub.jamesg.blog/post?type=repost&repost-of='+encodeURIComponent(window.location.href);})()">Repost 🔁</a></li>
+            <li><a href="javascript:(function(){window.location='{{ client_id }}/post?type=like&like-of='+encodeURIComponent(window.location.href);})()">Like ❤️</a></li>
+            <li><a href="javascript:(function(){window.location='{{ client_id }}/post?type=reply&in-reply-to='+encodeURIComponent(window.location.href);})()">Reply 💬</a></li>
+            <li><a href="javascript:(function(){window.location='{{ client_id }}/post?type=bookmark&bookmark-of='+encodeURIComponent(window.location.href);})()">Bookmark 🔖</a></li>
+            <li><a href="javascript:(function(){window.location='{{ client_id }}/post?type=rsvp&rsvp='+encodeURIComponent(window.location.href);})()">RSVP 📅</a></li>
+            <li><a href="javascript:(function(){window.location='{{ client_id }}/post?type=repost&repost-of='+encodeURIComponent(window.location.href);})()">Repost 🔁</a></li>
         </ul>
     </section>
     <section>

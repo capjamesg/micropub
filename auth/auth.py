@@ -9,7 +9,7 @@ import base64
 auth = Blueprint('auth', __name__)
 
 @auth.route("/callback")
-def indieauth_callback_handler():
+def indieauth_callback():
     code = request.args.get("code")
     state = request.args.get("state")
 
@@ -49,7 +49,10 @@ def logout():
 
 @auth.route("/login", methods=["GET"])
 def login():
-    return render_template("user/auth.html", title="Microsub Dashboard Login")
+    return render_template(
+        "user/auth.html",
+        title="Micropub Dashboard Login"
+    )
 
 @auth.route("/discover", methods=["POST"])
 def discover_auth_endpoint():

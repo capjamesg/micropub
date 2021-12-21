@@ -249,7 +249,7 @@ def create_post():
             return jsonify({"error": "You must be logged in to create a post."}), 401
 
     if request_type != None and url:
-        h_entry, site_supports_webmention = get_reply_context(url, request_type)
+        h_entry, site_supports_webmention = get_reply_context(url)
     else:
         h_entry = None
         site_supports_webmention = False
@@ -390,13 +390,16 @@ def settings():
             syndication = None
     else:
         return redirect("/login")
+
+    client_id = CLIENT_ID.strip("/")
     
     return render_template(
         "user/settings.html",
         title="Settings | Micropub Endpoint",
         user=user,
         me=me,
-        syndication=syndication
+        syndication=syndication,
+        client_id=client_id
     )
 
 @client.route("/schemas")
