@@ -22,8 +22,15 @@ def get_reply_context(url):
     photo_url = None
     site_supports_webmention = False
 
+    html_accept_header = {
+        'Accept': 'text/html',
+        'User-Agent': 'Microsub Client and Server'
+    }
+
     if url.startswith("https://") or url.startswith("http://"):
-        parsed = mf2py.parse(requests.get(url, timeout=10, verify=False).text)
+        req = requests.get(url, timeout=10, verify=False, headers=html_accept_header)
+
+        parsed = mf2py.parse(req.text)
 
         supports_webmention = requests.get("https://webmention.jamesg.blog/discover?target={}".format(url))
 
@@ -49,7 +56,7 @@ def get_reply_context(url):
                     if h_entry["properties"].get("author") and h_entry["properties"]["author"][0].startswith("/"):
                         author_url = url.split("/")[0] + "//" + domain + h_entry["properties"].get("author")[0]
 
-                    author = mf2py.parse(requests.get(author_url, timeout=10, verify=False).text)
+                    author = mf2py.parse(requests.get(author_url, timeout=10, verify=False, headers=html_accept_header).text)
                     
                     if author["items"] and author["items"][0]["type"] == ["h-card"]:
                         author_url = h_entry['properties']['author'][0]
@@ -82,13 +89,27 @@ def get_reply_context(url):
 
                 post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             else:
-                post_body = None
+                soup = BeautifulSoup(req.text, "html.parser")
+
+                p_name = soup.find("title")
+
+                if p_name:
+                    p_name = p_name.text
+
+                # delete <header> tags
+                for header in soup.find_all("header"):
+                    header.decompose()
+
+                if soup.find("article"):
+                    post_body = soup.find("article").text
+                elif soup.find("main"):
+                    post_body = soup.find("main").text
+                else:
+                    post_body = soup.text
 
             # get p-name
             if h_entry["properties"].get("name"):
                 p_name = h_entry["properties"]["name"][0]
-            else:
-                p_name = None
 
             if author_url != None and (not author_url.startswith("https://") and not author_url.startswith("http://")):
                 author_url = "https://" + author_url
@@ -107,6 +128,8 @@ def get_reply_context(url):
 
             # look for featured image to display in reply context
             if post_photo_url == None:
+                soup = BeautifulSoup(req.text, "html.parser")
+
                 if soup.find("meta", property="og:image") and soup.find("meta", property="og:image")["content"]:
                     post_photo_url = soup.find("meta", property="og:image")["content"]
                 elif soup.find("meta", property="twitter:image") and soup.find("meta", property="twitter:image")["content"]:
@@ -185,7 +208,7 @@ def get_reply_context(url):
 
             return h_entry, site_supports_webmention
 
-        soup = BeautifulSoup(requests.get(url).text, "lxml")
+        soup = BeautifulSoup(requests.get(url, headers=html_accept_header).text, "lxml")
 
         page_title = soup.find("title")
 
@@ -234,7 +257,7 @@ def get_reply_context(url):
             if not photo_url.startswith("https://") and not photo_url.startswith("http://"):
                 photo_url = "https://" + domain + photo_url
 
-            r = requests.get(photo_url, timeout=10, verify=False)
+            r = requests.get(photo_url, headers=html_accept_header, timeout=10, verify=False)
 
             if r.status_code != 200:
                 photo_url = None

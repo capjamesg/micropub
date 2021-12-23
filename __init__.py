@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session
 from flask_session import Session
-from .config import SENTRY_DSN, SENTRY_SERVER_NAME
+from config import SENTRY_DSN, SENTRY_SERVER_NAME
 import os
 
 # set up sentry for error handling

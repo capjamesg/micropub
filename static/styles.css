@@ -9,15 +9,17 @@ html {
 	font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 main {
-	max-width: 100vh;
-	width: 85%;
+	max-width: 35em;
 	margin: auto;
 	margin-top: 10px;
 }
 p, code, li {
 	font-size: 1.0625rem;
 	word-wrap: break-word;
-  }
+}
+select {
+	width: 100%;
+}
 nav {
 	display: flex;
 	justify-content: space-between;
@@ -253,7 +255,7 @@ select {
 a:hover {
 	color: #0000CD;
 }
-input[type="text"], input[type="username"], input[type="password"], input[type="url"], textarea {
+input[type="text"], input[type="username"], input[type="password"], input[type="url"], input[type="number"], textarea {
     padding: 10px;
     border-radius: 10px;
     margin-bottom: 10px;

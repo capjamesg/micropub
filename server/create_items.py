@@ -20,13 +20,22 @@ def process_social(repo, front_matter, interaction, content=None):
 
     json_content["layout"] = interaction.get("layout")
 
-    target = json_content.get(interaction.get("attribute"))
+    target = json_content.get(interaction.get("attribute"))[0]
 
-    if not target and interaction.get("attribute") != "coffee" and interaction.get("attribute") != "rsvp" and interaction.get("attribute") != "note":
+    if target.get("bookmark-of"):
+        target = target.get("bookmark-of")
+    elif target.get("like-of"):
+        target = target.get("like-of")
+    elif target.get("repost-of"):
+        target = target.get("repost-of")
+    else:
+        target = None
+
+    no_targets = ["coffee", "rsvp", "note", "watch-of"]
+
+    if not target and interaction.get("attribute") not in no_targets:
         return jsonify({"message": "Please enter a {} target.".format(interaction.get("attribute"))}), 400
-    elif target:
-        target = target[0]
-
+    elif target and type(target) == str and (target.startswith("https://") or target.startswith("http://")):
         title_req = requests.get(target)
 
         soup = BeautifulSoup(title_req.text, "lxml")
@@ -36,13 +45,13 @@ def process_social(repo, front_matter, interaction, content=None):
         else:
             title = target.replace("https://", "").replace("http://", "")
 
-    if target:
+    if target and interaction.get("attribute") not in no_targets:
         h_entry, _ = context.get_reply_context(target)
 
         if h_entry:
             json_content["context"] = h_entry
 
-    if content == None and target:
+    if (content == None or content == "") and target:
         content = "I {} <a href='{}' class='u-{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title)
         title = "{} {}".format(interaction.get("keyword").title(), title)
     else:

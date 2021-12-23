@@ -159,9 +159,14 @@
         <input type="text" name="watch-of" id="watch-of" placeholder="Superstore" required /><br>
         <label for="watch-type">Show type:</label><br>
         <select name="watch-type" id="watch-type">
-            <option value="show">TV Show</option>
-            <option value="movie">Documentary</option>
-            <option value="movie">Movie</option>
+            <option value="TV Show">TV Show</option>
+            <option value="Documentary">Documentary</option>
+            <option value="Movie">Movie</option>
+        </select><br>
+        <label for="status">Status:</label><br>
+        <select name="status" id="status">
+            <option value="Want to watch">Want to watch</option>
+            <option value="Watched">Watched</option>
         </select><br>
         <label for="rating">Rating (optional):</label><br>
         <input type="number" name="rating" id="rating" step="any" /><br>
@@ -181,7 +186,7 @@
     <p>Use the form below to share a link as a repost.</p>
     {% include "includes/context.html" %}
     <form action="/post" method="POST" enctype="application/x-www-form-urlencoded">
-        <label for="like-of">URL of the post to share as a repost:</label><br>
+        <label for="repost-of">URL of the post to share as a repost:</label><br>
         <input type="url" name="repost-of" id="repost-of" placeholder="https://jamesg.blog" {% if url %}value="{{ url }}"{% endif %}required /><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="category" id="category" value="Repost" required />

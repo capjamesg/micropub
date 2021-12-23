@@ -113,21 +113,23 @@ def create_post():
         if me and user:
             data = {
                 "type": ["h-entry"],
+                "properties": {}
             }
 
-            form_types = ["in-reply-to", "like-of", "repost-of", "bookmark-of"]
+            form_types = ["in-reply-to", "like-of", "repost-of", "bookmark-of", "watch-of"]
 
             for key in form_encoded:
                 if key in form_types:
-                    data[key] = [form_encoded[key]]
+                    del form_encoded["h"]
+                    del form_encoded["action"]
+
+                    data["properties"][key] = [form_encoded]
                     url = form_encoded[key]
                     request_type = key
                     break
 
             if request.form.get("syndication") and request.form.get("syndication") != "none":
                 data["syndication"] = [request.form.get("syndication")]
-
-            data["properties"] = {}
 
             # if roaster or varietals or country
             if request.form.get("drank"):
@@ -243,6 +245,8 @@ def create_post():
                 return redirect(r.headers["Location"])
             else:
                 flash("Your post was successfully created.")
+
+            title = "Create Post"
             
             return render_template("post/create_post.html", title=title, post_type=post_type, user=user, me=me)
         else:
@@ -371,13 +375,13 @@ def update_post():
             return jsonify({"error": "You must be logged in to create a post."}), 401
 
     return render_template(
-            "post/update_post.html",
-            title=title,
-            post_type=post_type,
-            user=user, me=me,
-            id=id,
-            properties=properties
-        )
+        "post/update_post.html",
+        title=title,
+        post_type=post_type,
+        user=user, me=me,
+        id=id,
+        properties=properties
+    )
 
 @client.route("/settings")
 def settings():

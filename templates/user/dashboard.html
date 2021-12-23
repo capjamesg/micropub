@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>James' Micropub Endpoint</h1>
-<section>
+<section class="main_content_box">
+    <h1>James' Micropub Endpoint</h1>
     {% if action == None %}
     <p>Welcome to James' Micropub Endpoint.</p>
     {% endif %}
@@ -13,7 +13,7 @@
         {% endif %}
     {% endwith %}
     {% if user and action == None %}
-        <section class="box">
+        <section>
             <h2>Create posts</h2>
             <p>You can:</p>
             <ul>
@@ -25,7 +25,7 @@
                 <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
                 <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
                 <li><a href="/post?type=repost">Share a link 🔁</a></li>
-                <li><a href="/post?type=watch">Create a Watch Post 🎬</a></li>
+                <li><a href="/post?type=watch">Create a watch post 🎬</a></li>
                 {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
                     <li><a href="/post?type=photo">Upload a photo 📷</a></li>
                 {% endif %}
