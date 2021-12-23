@@ -41,6 +41,13 @@ interactions = {
         "category": "Note",
         "layout": "social_post"
     },
+    "watch": {
+        "attribute": "watch",
+        "keyword": "watched",
+        "folder": "_watches",
+        "category": "Watch",
+        "layout": "social_post"
+    },
     "coffee": {
         "attribute": "coffee",
         "keyword": "",
