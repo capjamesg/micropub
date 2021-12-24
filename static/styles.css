@@ -322,6 +322,23 @@ li {
 	input[type="submit"] {
 		text-align: center;
 	}
+	.box li {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+	}
+	.box li a {
+		padding: 10px;
+		text-align: center;
+		border: 1px solid lightgray;
+		margin: 10px;
+		border-radius: 10px;
+	}
+	.box ul {
+		padding: 0;
+		margin: 0;
+	}
 }
 h1 {
 	display: inline-block;
