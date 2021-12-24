@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="main_content_box">
-    <h1>James' Micropub Endpoint</h1>
-    {% if action == None %}
-    <p>Welcome to James' Micropub Endpoint.</p>
-    {% endif %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+    <section>
+        <h1>James' Micropub Endpoint</h1>
+        {% if action == None %}
+        <p>Welcome to James' Micropub Endpoint.</p>
         {% endif %}
-    {% endwith %}
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </section>
     {% if user and action == None %}
         <section>
             <h2>Create posts</h2>
