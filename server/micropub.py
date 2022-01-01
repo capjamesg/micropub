@@ -188,7 +188,7 @@ def micropub_endpoint():
             folder = request.args.get("url").split("/")[-2]
             url = request.args.get("url").split("/")[-1]
 
-            with open(HOME_FOLDER + "_{}/{}.md".format(folder, url), "r") as file:
+            with open(HOME_FOLDER + f"_{folder}/{url}.md", "r") as file:
                 content = file.readlines()
 
             end_of_yaml = content[1:].index("---\n") + 1
@@ -256,7 +256,7 @@ def media_endpoint():
             repo.create_file("assets/" + filename, "create image for micropub client", image_file.read(), branch="main")
 
         resp = jsonify({"message": "Created"})
-        resp.headers["Location"] = "https://jamesg.blog/assets/{}".format(filename)
+        resp.headers["Location"] = f"https://jamesg.blog/assets/{filename}"
         return resp, 201
     else:
         abort(405)

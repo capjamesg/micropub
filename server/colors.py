@@ -38,7 +38,7 @@ def get_rendered_html(string, lang):
 
             for item in range(0, len(to_look)):
                 if to_look[item] in i.strip():
-                    i = i.replace(to_look[item], "<span style='color:{}'>{}</span>".format(colors[item], to_look[item]))
+                    i = i.replace(to_look[item], f"<span style='color:{colors[item]}'>{to_look[item]}</span>")
 
             if i.strip().startswith("for "):
                 i = i.replace("for", "<span style='color:orange'>for</span>")
@@ -53,7 +53,7 @@ def get_rendered_html(string, lang):
 
             for w in i.split(" "):
                 if w.startswith("$"):
-                    w = "<span style='color:darkblue'>{}</span>".format(w)
+                    w = f"<span style='color:darkblue'>{w}</span>"
                     final_str.append(w)
                 else:
                     final_str.append(w)

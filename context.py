@@ -32,7 +32,7 @@ def get_reply_context(url):
 
         parsed = mf2py.parse(req.text)
 
-        supports_webmention = requests.get("https://webmention.jamesg.blog/discover?target={}".format(url))
+        supports_webmention = requests.get(f"https://webmention.jamesg.blog/discover?target={url}")
 
         if supports_webmention.status_code == 200:
             if supports_webmention.json().get("success") == True:
@@ -82,12 +82,8 @@ def get_reply_context(url):
                         author_image = "https://" + domain + photo_url
                 else:
                     author_image = None
-
-                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             elif h_entry["properties"].get("content"):
                 post_body = h_entry["properties"]["content"]
-
-                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             else:
                 soup = BeautifulSoup(req.text, "html.parser")
 
@@ -106,6 +102,9 @@ def get_reply_context(url):
                     post_body = soup.find("main").text
                 else:
                     post_body = soup.text
+
+            if post_body:
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
 
             # get p-name
             if h_entry["properties"].get("name"):
@@ -168,6 +167,8 @@ def get_reply_context(url):
 
             if h_card["properties"].get("note"):
                 post_body = h_card['properties']['note'][0]
+
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
             else:
                 post_body = None
 
@@ -181,15 +182,15 @@ def get_reply_context(url):
             site_supports_webmention = False
             tweet_uid = url.strip("/").split("/")[-1]
             headers = {
-                "Authorization": "Bearer {}".format(TWITTER_BEARER_TOKEN)
+                "Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"
             }
-            r = requests.get("https://api.twitter.com/2/tweets/{}?tweet.fields=author_id".format(tweet_uid), headers=headers, timeout=10, verify=False)
+            r = requests.get(f"https://api.twitter.com/2/tweets/{tweet_uid}?tweet.fields=author_id", headers=headers, timeout=10, verify=False)
 
             if r and r.status_code != 200:
                 return {}, None
 
             get_author = requests.get(
-                "https://api.twitter.com/2/users/{}?user.fields=url,name,profile_image_url,username".format(r.json()["data"].get("author_id")),
+                f"https://api.twitter.com/2/users/{r.json()['data'].get('author_id')}?user.fields=url,name,profile_image_url,username",
                 headers=headers,
                 timeout=10,
                 verify=False
@@ -204,7 +205,12 @@ def get_reply_context(url):
                 author_name = None
                 author_url = None
 
-            h_entry = {"p-name": "", "post_body": r.json()["data"].get("text"), "author_image": photo_url, "author_url": author_url, "author_name": author_name}
+            post_body = r.json()["data"].get("text")
+
+            if post_body:
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
+
+            h_entry = {"p-name": "", "post_body": post_body, "author_image": photo_url, "author_url": author_url, "author_name": author_name}
 
             return h_entry, site_supports_webmention
 
@@ -220,6 +226,7 @@ def get_reply_context(url):
 
         if main_tag:
             p_tag = main_tag.find("h1")
+            
             if p_tag:
                 p_tag = p_tag.text
             else:

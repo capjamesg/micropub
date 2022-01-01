@@ -2,15 +2,15 @@ import config
 import os
 
 def check_folder(folder_name, url, get_contents, repo):
-    if os.path.exists(config.HOME_FOLDER + "{}/{}.md".format(folder_name, url)):
-        with open(config.HOME_FOLDER + "{}/{}.md".format(folder_name, url), "r") as file:
+    if os.path.exists(config.HOME_FOLDER + f"{folder_name}/{url}.md"):
+        with open(config.HOME_FOLDER + f"{folder_name}/{url}.md", "r") as file:
             if get_contents == True:
                 contents = file.readlines()
             else:
                 contents = file.read()
 
         if get_contents == True:
-            repo_file_contents = repo.get_contents("{}/{}.md".format(folder_name, url), ref="main")
+            repo_file_contents = repo.get_contents(f"{folder_name}/{url}.md", ref="main")
         else:
             repo_file_contents = None
 

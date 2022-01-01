@@ -24,7 +24,7 @@ def index():
         if user:
             url = request.form["url"]
             if request.form["action"] == "update":
-                return redirect("/update?url={}".format(url))
+                return redirect(f"/update?url={url}")
             elif request.form["action"] == "delete":
                 if session.get("scopes") and not "delete" in session.get("scopes").split(" "):
                     flash("You do not have permission to update posts.")
@@ -32,9 +32,9 @@ def index():
 
                 r = requests.post(ENDPOINT_URL,
                     json={"type": ["h-entry"], "action": "delete", "url": url},
-                    headers={"Authorization": "Bearer {}".format(user)})
+                    headers={"Authorization": f"Bearer {user}"})
                 if r.status_code == 200 or r.status_code == 201:
-                    flash("Your {} post was successfully deleted.".format(url))
+                    flash(f"Your {url} post was successfully deleted.")
                 else:
                     flash(r.json()["message"].strip("."))
                 return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
@@ -44,9 +44,9 @@ def index():
                     return redirect("/")
                 r = requests.post(ENDPOINT_URL,
                     json={"type": ["h-entry"], "action": "undelete", "url": url},
-                    headers={"Authorization": "Bearer {}".format(user)})
+                    headers={"Authorization": f"Bearer {user}"})
                 if r.status_code == 200 or r.status_code == 201:
-                    flash("Your {} post was successfully undeleted.".format(url))
+                    flash(f"Your {url} post was successfully undeleted.")
                 else:
                     flash(r.json()["message"].strip("."))
                 return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
@@ -87,7 +87,7 @@ def create_post():
         post, attribute = item
 
         if post_type == post:
-            title = "Create a {} Post | Micropub Endpoint".format(post.title())
+            title = f"Create a {post.title()} Post | Micropub Endpoint"
             url = request.args.get(attribute)
             request_type = attribute
 
@@ -104,11 +104,11 @@ def create_post():
         if request.form.get("preview") and not request.form.get("in-reply-to"):
             post_type = None
             if request.form.get("like-of"):
-                return redirect("/post?type=like&like-of={}&is_previewing=true".format(request.form.get("like-of")))
+                return redirect(f"/post?type=like&like-of={request.form.get('like-of')}&is_previewing=true")
             elif request.form.get("bookmark-of"):
-                return redirect("/post?type=bookmark&bookmark-of={}&is_previewing=true".format(request.form.get("bookmark-of")))
+                return redirect(f"/post?type=bookmark&bookmark-of={request.form.get('bookmark-of')}&is_previewing=true")
             elif request.form.get("repost-of"):
-                return redirect("/post?type=repost&repost-of={}&is_previewing=true".format(request.form.get("repost-of")))
+                return redirect(f"/post?type=repost&repost-of={request.form.get('repost-of')}&is_previewing=true")
 
         if me and user:
             data = {
@@ -230,9 +230,9 @@ def create_post():
                         categories += [i]
                 form_encoded["category[]"] = categories
 
-                r = requests.post(ENDPOINT_URL, data=form_encoded, headers={"Authorization": "Bearer {}".format(user)})
+                r = requests.post(ENDPOINT_URL, data=form_encoded, headers={"Authorization": f"Bearer {user}"})
             else:
-                r = requests.post(ENDPOINT_URL, json=data, headers={"Authorization": "Bearer {}".format(user)})
+                r = requests.post(ENDPOINT_URL, json=data, headers={"Authorization": f"Bearer {user}"})
 
             try:
                 response = r.json()
@@ -302,7 +302,7 @@ def update_post():
 
     try:
         properties = requests.get(ENDPOINT_URL + "?q=source&url=" + id,
-            headers={"Authorization": "Bearer {}".format(user)})
+            headers={"Authorization": f"Bearer {user}"})
 
         properties = properties.json()
     except:
@@ -350,7 +350,7 @@ def update_post():
                 data["in-reply-to"] = request.form.get("in-reply-to")
 
             r = requests.post(ENDPOINT_URL, json=data, headers={
-                "Authorization": "Bearer {}".format(user), "Content-Type": "application/json"
+                "Authorization": f"Bearer {user}", "Content-Type": "application/json"
             })
 
             try:
@@ -445,7 +445,7 @@ def forward_media_query():
 
     r = requests.post(MEDIA_ENDPOINT_URL,
         files={"file": (filename,open(os.path.join(UPLOAD_FOLDER, filename), "rb"), 'image/jpeg')},
-        headers={"Authorization": "Bearer {}".format(session["access_token"])})
+        headers={"Authorization": f"Bearer {session['access_token']}"})
 
     if r.status_code != 201:
         flash("Error: " + str(r.json()["message"]))

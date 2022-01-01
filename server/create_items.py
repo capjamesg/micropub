@@ -34,7 +34,7 @@ def process_social(repo, front_matter, interaction, content=None):
     no_targets = ["coffee", "rsvp", "note", "watch-of"]
 
     if not target and interaction.get("attribute") not in no_targets:
-        return jsonify({"message": "Please enter a {} target.".format(interaction.get("attribute"))}), 400
+        return jsonify({"message": f"Please enter a {interaction.get('attribute')} target."}), 400
     elif target and type(target) == str and (target.startswith("https://") or target.startswith("http://")):
         title_req = requests.get(target)
 
@@ -52,26 +52,26 @@ def process_social(repo, front_matter, interaction, content=None):
             json_content["context"] = h_entry
 
     if (content == None or content == "") and target:
-        content = "I {} <a href='{}' class='u-{}'>{}</a>.".format(interaction.get("keyword"), target, interaction.get("attribute"), title)
-        title = "{} {}".format(interaction.get("keyword").title(), title)
+        content = f"I {interaction.get('keyword')} <a href='{target}' class='u-{interaction.get('attribute')}'>{title}</a>."
+        title = f"{interaction.get('keyword').title()} {title}"
     else:
-        title = "{}".format(interaction.get("keyword").title())
+        title = f"{interaction.get('keyword').title()}"
 
     front_matter = yaml.dump(json_content)
 
     random_sequence = "".join(random.sample(string.ascii_letters, 3))
 
-    with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "w+") as f:
+    with open(HOME_FOLDER + f"random-{random_sequence}.txt", "w+") as f:
         f.write(content)
     
     if "<pre lang='python'>" in content:
-        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
+        with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
             content = colors.get_rendered_html(f.read(), "python")
     elif "<pre lang='bash'>" in content:
-        with open(HOME_FOLDER + "random-{}.txt".format(random_sequence), "r") as f:
+        with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
             content = colors.get_rendered_html(f.read(), "bash")
 
-    os.remove(HOME_FOLDER + "random-{}.txt".format(random_sequence))
+    os.remove(HOME_FOLDER + f"random-{random_sequence}.txt")
 
     return write_to_file(front_matter, content, repo, title, interaction.get("folder"), category=interaction.get("category")), 201
 
@@ -94,7 +94,7 @@ def process_checkin(repo, front_matter, content):
         if not json_content.get("street_address") or not json_content.get("locality") \
             or not json_content.get("region") or not json_content.get("country_name"):
             r = requests.get(
-                "https://maps.googleapis.com/maps/api/geocode/json?latlng={},{}&key={}".format(json_content.get("latitude"), json_content.get("longitude"), GOOGLE_API_KEY)
+                f"https://maps.googleapis.com/maps/api/geocode/json?latlng={json_content.get('latitude')},{json_content.get('longitude')}&key={GOOGLE_API_KEY}"
             )
 
             if r.status_code == 200:
@@ -116,14 +116,14 @@ def process_checkin(repo, front_matter, content):
         slug = json_content.get("name")[0].replace(" ", "-").replace(".", "-").replace("-", "").replace(",", "").lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
 
         if not content:
-            content = "Checked in to {}.".format(json_content.get("name")[0].replace(":", ""))
+            content = f"Checked in to {json_content.get('name')[0].replace(':', '')}."
 
-        title = "Checkin to {}".format(json_content.get("name")[0])
+        title = f"Checkin to {json_content.get('name')[0]}"
     else:
         slug = "".join(random.sample(string.ascii_letters, 3))
 
         if not content:
-            content = "Checked in to {}.".format(json_content["checkin"][0]["properties"]["name"][0].replace(":", ""))
+            content = f"Checked in to {json_content['checkin'][0]['properties']['name'][0].replace(':', '')}."
             title = content
 
     if json_content.get("url"):
@@ -168,17 +168,17 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
     
     slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(100, 999))
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "w+") as file:
+    with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "w+") as file:
         file.write("---\n")
         file.write(front_matter)
         file.write("---\n")
         file.write(content)
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder_name, slug), "r") as file:
-        repo.create_file("{}/".format(folder_name) + slug + ".md", "create post from micropub client", file.read(), branch="main")
+    with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "r") as file:
+        repo.create_file(f"{folder_name}/" + slug + ".md", "create post from micropub client", file.read(), branch="main")
 
     resp = jsonify({"message": "Created"})
-    resp.headers["Location"] = "https://jamesg.blog/{}/{}".format(folder_name.replace("_", ""), slug)
+    resp.headers["Location"] = f"https://jamesg.blog/{folder_name.replace('_', '')}/{slug}"
 
     return resp
 
@@ -236,7 +236,7 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
     if contents == None and repo_file_contents == None and folder == None:
         return jsonify({"message": "Post not found."}), 404
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
+    with open(HOME_FOLDER + f"{folder}/{url}.md", "r") as file:
         content = file.readlines()
 
     end_of_yaml = content[1:].index("---\n") + 1
@@ -282,14 +282,14 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
                 if item in yaml_to_json.keys():
                     yaml_to_json.pop(item)
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "w+") as file:
+    with open(HOME_FOLDER + f"{folder}/{url}.md", "w+") as file:
         file.write("---\n")
         file.write(yaml.dump(yaml_to_json))
         file.write("---\n")
         file.write(full_contents_for_writing)
 
-    with open(HOME_FOLDER + "{}/{}.md".format(folder, url), "r") as file:
-        repo.update_file("{}/{}.md".format(folder, url), "update post via micropub", file.read(), repo_file_contents.sha, branch="main")
+    with open(HOME_FOLDER + f"{folder}/{url}.md", "r") as file:
+        repo.update_file(f"{folder}/{url}.md", "update post via micropub", file.read(), repo_file_contents.sha, branch="main")
 
     resp = jsonify({"message": "Post updated."})
     resp.headers["Location"] = original_url
