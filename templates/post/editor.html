@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    html, .main_content_box, main {
+        margin: auto;
+        max-width: 50em;
+    }
+    textarea {
+        border: none;
+        width: 100%;
+        height: 100%;
+        font-size: xx-large;
+    }
+    textarea:focus {
+        outline: none;
+    }
+</style>
+<section class="main_content_box">
+    <form action="/post" method="POST" enctype="multipart/form-data">
+        <nav>
+            <p><a href="/micropub">Micropub</a></p>
+            <ul>
+                <li><input type="submit" value="Submit post"></li>
+            </ul>
+        </nav>
+        <textarea name="content" id="content" rows="20" required placeholder="Express yourself..." aria-labelledby="Post content"></textarea><br>
+        <input type="hidden" value="" name="access_token" id="access_token" required />
+        <input type="hidden" name="h" id="h" value="entry" required />
+        <input type="hidden" name="action" id="action" value="create" required />
+    </form>
+</section>
+{% endblock %}

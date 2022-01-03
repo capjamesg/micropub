@@ -43,19 +43,21 @@
   <body>
     <main>
       <a href="#main" class="accessibility_label">Skip to main content</a>
-      <nav id="top_navigation">
-        <p><a href="/">Micropub Endpoint</a></p>
-        {% if user %}
-        <ul>
-          <li><a href="/settings">Signed in as {{ me.replace("http://", "").strip("/") }}</a></li>
-          <li><a href="/logout">Logout</a></li>
-        </ul>
-        {% else %}
-        <ul>
-          <li><a href="/login">Login</a></li>
-        </ul>
-        {% endif %}
-      </nav>
+      {% if url_for(request.endpoint) != "/editor" %}
+        <nav id="top_navigation">
+          <p><a href="/">Micropub Endpoint</a></p>
+          {% if user %}
+          <ul>
+            <li><a href="/settings">Signed in as {{ me.replace("http://", "").strip("/") }}</a></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+          {% else %}
+          <ul>
+            <li><a href="/login">Login</a></li>
+          </ul>
+          {% endif %}
+        </nav>
+      {% endif %}
       <script>
         if (localStorage.getItem('darkmode') == "true") {
           document.getElementById('darkmode').media = "all";

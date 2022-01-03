@@ -11,6 +11,10 @@ client = Blueprint("client", __name__, static_folder="static", static_url_path="
 
 g = Github(GITHUB_KEY)
 
+# @client.route("/editor", methods=["GET"])
+# def editor_page():
+#     return render_template("post/editor.html")
+
 @client.route("/", methods=["GET", "POST"])
 def index():
     if session.get("access_token"):

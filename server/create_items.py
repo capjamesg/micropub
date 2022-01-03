@@ -20,14 +20,17 @@ def process_social(repo, front_matter, interaction, content=None):
 
     json_content["layout"] = interaction.get("layout")
 
-    target = json_content.get(interaction.get("attribute"))[0]
+    if json_content.get(interaction.get("attribute")):
+        target = json_content.get(interaction.get("attribute"))[0]
 
-    if target.get("bookmark-of"):
-        target = target.get("bookmark-of")
-    elif target.get("like-of"):
-        target = target.get("like-of")
-    elif target.get("repost-of"):
-        target = target.get("repost-of")
+        if target.get("bookmark-of"):
+            target = target.get("bookmark-of")
+        elif target.get("like-of"):
+            target = target.get("like-of")
+        elif target.get("repost-of"):
+            target = target.get("repost-of")
+        else:
+            target = None
     else:
         target = None
 
@@ -142,10 +145,11 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
 
     json_content["published"] = datetime.datetime.now()
 
-    if category != None and type(category) == list:
-        json_content["category"] = category
-    elif category != None and type(category) == str:
-        json_content["category"] = [category]
+    if not json_content.get("category"):
+        if category != None and type(category) == list:
+            json_content["category"] = category
+        elif category != None and type(category) == str:
+            json_content["category"] = [category]
 
     if post_name:
         json_content["title"] = post_name
