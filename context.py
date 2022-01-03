@@ -263,7 +263,7 @@ def get_reply_context(url):
         if favicon and not photo_url:
             photo_url = favicon["href"]
             if not photo_url.startswith("https://") and not photo_url.startswith("http://"):
-                photo_url = "https://" + domain + photo_url
+                photo_url = "https://" + domain + "/" + photo_url
 
             r = requests.get(photo_url, headers=html_accept_header, timeout=10, verify=False)
 
