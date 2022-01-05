@@ -448,7 +448,7 @@ def forward_media_query():
     photo.save(os.path.join(UPLOAD_FOLDER, filename))
 
     r = requests.post(MEDIA_ENDPOINT_URL,
-        files={"file": (filename,open(os.path.join(UPLOAD_FOLDER, filename), "rb"), 'image/jpeg')},
+        files={"file": (filename ,open(os.path.join(UPLOAD_FOLDER, filename), "rb"), 'image/jpeg')},
         headers={"Authorization": f"Bearer {session['access_token']}"})
 
     if r.status_code != 201:

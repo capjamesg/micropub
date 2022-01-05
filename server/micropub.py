@@ -24,8 +24,6 @@ def micropub_endpoint():
         if has_valid_token == False:
             abort(403)
 
-        scopes = ["create"]
-
         # the "create" scope is required to use the endpoint
         
         validate_scope("create", scopes)
