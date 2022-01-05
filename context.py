@@ -178,41 +178,41 @@ def get_reply_context(url):
             
         h_entry = {}
 
-        # if url.startswith("https://twitter.com"):
-        #     site_supports_webmention = False
-        #     tweet_uid = url.strip("/").split("/")[-1]
-        #     headers = {
-        #         "Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"
-        #     }
-        #     r = requests.get(f"https://api.twitter.com/2/tweets/{tweet_uid}?tweet.fields=author_id", headers=headers, timeout=10, verify=False)
+        if url.startswith("https://twitter.com"):
+            site_supports_webmention = False
+            tweet_uid = url.strip("/").split("/")[-1]
+            headers = {
+                "Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"
+            }
+            r = requests.get(f"https://api.twitter.com/2/tweets/{tweet_uid}?tweet.fields=author_id", headers=headers, timeout=10, verify=False)
 
-        #     if r and r.status_code != 200:
-        #         return {}, None
+            if r and r.status_code != 200:
+                return {}, None
 
-        #     get_author = requests.get(
-        #         f"https://api.twitter.com/2/users/{r.json()['data'].get('author_id')}?user.fields=url,name,profile_image_url,username",
-        #         headers=headers,
-        #         timeout=10,
-        #         verify=False
-        #     )
+            get_author = requests.get(
+                f"https://api.twitter.com/2/users/{r.json()['data'].get('author_id')}?user.fields=url,name,profile_image_url,username",
+                headers=headers,
+                timeout=10,
+                verify=False
+            )
 
-        #     if get_author and get_author.status_code == 200:
-        #         photo_url = get_author.json()["data"].get("profile_image_url")
-        #         author_name = get_author.json()["data"].get("name")
-        #         author_url = "https://twitter.com/" + get_author.json()["data"].get("username")
-        #     else:
-        #         photo_url = None
-        #         author_name = None
-        #         author_url = None
+            if get_author and get_author.status_code == 200:
+                photo_url = get_author.json()["data"].get("profile_image_url")
+                author_name = get_author.json()["data"].get("name")
+                author_url = "https://twitter.com/" + get_author.json()["data"].get("username")
+            else:
+                photo_url = None
+                author_name = None
+                author_url = None
 
-        #     post_body = r.json()["data"].get("text")
+            post_body = r.json()["data"].get("text")
 
-        #     if post_body:
-        #         post_body = " ".join(post_body.split(" ")[:75]) + " ..."
+            if post_body:
+                post_body = " ".join(post_body.split(" ")[:75]) + " ..."
 
-        #     h_entry = {"p-name": "", "post_body": post_body, "author_image": photo_url, "author_url": author_url, "author_name": author_name}
+            h_entry = {"p-name": "", "post_body": post_body, "author_image": photo_url, "author_url": author_url, "author_name": author_name}
 
-        #     return h_entry, site_supports_webmention
+            return h_entry, site_supports_webmention
 
         soup = BeautifulSoup(requests.get(url, headers=html_accept_header).text, "lxml")
 

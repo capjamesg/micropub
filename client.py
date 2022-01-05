@@ -441,9 +441,9 @@ def forward_media_query():
         return jsonify({"error": "You must be logged in to upload a photo."}), 401
     
     if request.form.get("filename"):
-        filename = secure_filename(request.form.get("filename").replace(".", ""))
+        filename = secure_filename(request.form.get("filename").replace("..", ""))
     else:
-        filename = secure_filename(photo.filename.replace(".", ""))
+        filename = secure_filename(photo.filename.replace("..", ""))
 
     photo.save(os.path.join(UPLOAD_FOLDER, filename))
 

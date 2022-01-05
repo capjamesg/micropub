@@ -217,12 +217,12 @@ def micropub_endpoint():
 def media_endpoint():
     has_valid_token, scopes = verify_user(request)
 
-    # if has_valid_token == False:
-    #     abort(403)
+    if has_valid_token == False:
+        abort(403)
 
     # the "media" scope is required to use the endpoint
 
-    # validate_scope("media", scopes)
+    validate_scope("media", scopes)
 
     if request.method == "POST":
         if not request.headers["Content-Type"].startswith("multipart/form-data"):
@@ -234,9 +234,13 @@ def media_endpoint():
             return jsonify({"message": "Please send a file."}), 400
 
         # get file extension
-        ext = os.path.splitext(file.filename)[1]
-        # if ext not in (".jpg", ".jpeg", ".png", ".gif"):
-        #     return jsonify({"message": "Please send a valid image file."}), 400
+        if "." in file.filename:
+            ext = file.filename.split(".")[-1]
+        else:
+            return jsonify({"message": "Please send a file with an extension."}), 400
+
+        if ext not in ALLOWED_EXTENSIONS:
+            return jsonify({"message": "Please send a valid image file."}), 400
 
         filename = "".join(random.sample(string.ascii_letters, 5)) + "-" + secure_filename(file.filename)
 
@@ -252,11 +256,13 @@ def media_endpoint():
 
         repo = g.get_repo("capjamesg/jamesg.blog")
 
+        final_filename = filename + "." + ext
+
         with open(os.path.join(UPLOAD_FOLDER, filename), "rb") as image_file:
-            repo.create_file("assets/" + filename, "create image for micropub client", image_file.read(), branch="main")
+            repo.create_file("assets/" + final_filename, "create image for micropub client", image_file.read(), branch="main")
 
         resp = jsonify({"message": "Created"})
-        resp.headers["Location"] = f"https://jamesg.blog/assets/{filename}"
+        resp.headers["Location"] = f"https://jamesg.blog/assets/{final_filename}"
         return resp, 201
     else:
         abort(405)
