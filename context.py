@@ -23,7 +23,7 @@ def get_reply_context(url):
     site_supports_webmention = False
 
     html_accept_header = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'User-Agent': 'Microsub Client and Server'
     }
 

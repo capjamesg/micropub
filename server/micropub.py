@@ -26,7 +26,7 @@ def micropub_endpoint():
 
         # the "create" scope is required to use the endpoint
         
-        validate_scope("create", scopes)
+        # validate_scope("create", scopes)
 
         # check content type
         if not request.headers["Content-Type"].startswith("multipart/form-data") \
