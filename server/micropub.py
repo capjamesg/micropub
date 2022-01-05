@@ -242,7 +242,7 @@ def media_endpoint():
         if ext not in ALLOWED_EXTENSIONS:
             return jsonify({"message": "Please send a valid image file."}), 400
 
-        filename = "".join(random.sample(string.ascii_letters, 5)) + "-" + secure_filename(file.filename)
+        filename = "".join(random.sample(string.ascii_letters, 5)) + "-" + "." + ext
 
         # save image as file then open with PIL for resizing
 
@@ -256,13 +256,11 @@ def media_endpoint():
 
         repo = g.get_repo("capjamesg/jamesg.blog")
 
-        final_filename = filename + "." + ext
-
         with open(os.path.join(UPLOAD_FOLDER, filename), "rb") as image_file:
-            repo.create_file("assets/" + final_filename, "create image for micropub client", image_file.read(), branch="main")
+            repo.create_file("assets/" + filename, "create image for micropub client", image_file.read(), branch="main")
 
         resp = jsonify({"message": "Created"})
-        resp.headers["Location"] = f"https://jamesg.blog/assets/{final_filename}"
+        resp.headers["Location"] = f"https://jamesg.blog/assets/{filename}"
         return resp, 201
     else:
         abort(405)
