@@ -8,29 +8,7 @@
         {% endfor %}
         {% endif %}
     {% endwith %}
-    {% if post_type == "coffee" %}
-    <h1>Update a coffee post ☕</h1>
-    <p>Use the form below to update a coffee entry on your personal website.</p>
-    <form action="/update?url={{ id }}" method="POST" enctype="multipart/form-data">
-        <label for="title">Post title:</label><br>
-        <input type="text" name="title" id="title" placeholder="I am drinking..." value="{{ properties.get('properties').get('title') }}" required /><br>
-        <label for="content">Post contents (optional):</label><br>
-        <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
-        <label for="roaster">Roaster (optional):</label><br>
-        <input type="text" name="roaster" id="roaster" placeholder="Fortitude Coffee" value="{{ properties.get('properties').get('coffee_info').get('roaster')[0] }}" /><br>
-        <label for="varietals">Varietal(s) (optional):</label><br>
-        <input type="text" name="varietals" id="varietals" placeholder="SL24, SL-28..." value="{{ properties.get('properties').get('coffee_info').get('varietals')[0] }}" /><br>
-        <label for="country">Country (optional):</label><br>
-        <input type="text" name="country" id="country" placeholder="Kenya" value="{{ properties.get('properties').get('coffee_info').get('country')[0] }}" /><br>
-        <label for="process">Process (optional):</label><br>
-        <input type="text" name="process" id="process" placeholder="Washed" value="{{ properties.get('properties').get('coffee_info').get('process')[0] }}" /><br>
-        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
-        <input type="hidden" name="category" id="category" value="Coffee" required />
-        <input type="hidden" name="h" id="h" value="entry" required />
-        <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit post">
-    </form>
-    {% elif post_type == "note" %}
+    {% if post_type == "note" %}
     <h1>Update a note 📝</h1>
     <p>Use the form below to update a note on your personal website.</p>
     <form action="/update?url={{ id }}" method="POST" enctype="multipart/form-data">

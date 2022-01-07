@@ -1,16 +1,18 @@
-from flask import jsonify, request, g, Blueprint, abort, session
-from werkzeug.utils import secure_filename
-from interactions import interactions
-from auth.auth_helpers import verify_user, validate_scope
-from PIL import Image, ImageOps
-from . import create_items
-from github import Github
-from config import *
-import requests
+import os
 import string
 import random
+
+from flask import jsonify, request, g, Blueprint, abort
+from werkzeug.utils import secure_filename
+from PIL import Image, ImageOps
+from github import Github
+import requests
 import yaml
-import os
+
+from . import create_items
+from interactions import interactions
+from auth.auth_helpers import verify_user, validate_scope
+from config import GITHUB_KEY, UPLOAD_FOLDER, MEDIA_ENDPOINT_URL, HOME_FOLDER, ALLOWED_EXTENSIONS
 
 micropub = Blueprint("micropub", __name__)
 
@@ -21,7 +23,7 @@ def micropub_endpoint():
     if request.method == "POST":
         has_valid_token, scopes = verify_user(request)
 
-        if has_valid_token == False:
+        if has_valid_token is False:
             abort(403)
 
         # the "create" scope is required to use the endpoint
@@ -48,9 +50,14 @@ def micropub_endpoint():
                 photo_list = []
                 for photo in request.files.getlist("photo[]"):
                     photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
-                    photo_r = requests.post(MEDIA_ENDPOINT_URL,
+                    photo_r = requests.post(
+                        MEDIA_ENDPOINT_URL,
                         files={
-                            "file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')
+                            "file": (
+                                secure_filename(photo.filename),
+                                open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"),
+                                'image/jpeg'
+                            )
                         }
                     )
                     object_type = request.form.to_dict()
@@ -61,9 +68,13 @@ def micropub_endpoint():
                 photo.save(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)))
                 photo_r = requests.post(MEDIA_ENDPOINT_URL, 
                     files={
-                        "file": (secure_filename(request.files.get("photo").filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(request.files.get("photo").filename)), "rb"), 'image/jpeg')
-                        }
-                    )
+                        "file": (
+                            secure_filename(request.files.get("photo").filename),
+                            open(os.path.join(UPLOAD_FOLDER, secure_filename(request.files.get("photo").filename)), "rb"),
+                            'image/jpeg'
+                        )
+                    }
+                )
                 object_type["photo"] = photo_r.headers.get("Location")
             content = request.form.get("content")
         else:
@@ -83,7 +94,7 @@ def micropub_endpoint():
             elif object_type.get(item) and type(object_type.get(item)) != list:
                 object_type["properties"][item] = [object_type.get(item)]
     
-        root_properties = ["p-rsvp", "drank", "checkin"]
+        root_properties = ["p-rsvp", "checkin"]
 
         if object_type.get("properties") and object_type["properties"].get("content") and type(object_type["properties"].get("content")[0]) == dict:
             content = object_type["properties"].get("content")[0].get("html")
@@ -99,9 +110,6 @@ def micropub_endpoint():
 
                 content = object_type[root_property]["properties"].get("content")[0]
                 del object_type[root_property]["properties"]["content"]
-            elif object_type.get("drank") and object_type["drank"][0]["properties"].get("content") and type(object_type["drank"][0]["properties"].get("content")[0]) == dict:
-                content = object_type[root_property]["properties"].get("content")[0].get("html")
-                del object_type[root_property]["properties"]["content"]
 
         content_to_remove = object_type.get("content")
 
@@ -114,8 +122,6 @@ def micropub_endpoint():
             front_matter = yaml.dump(object_type.get("p-rsvp").get("properties"))
         elif object_type.get("properties"):
             front_matter = yaml.dump(object_type["properties"])
-        elif object_type.get("drank"):
-            front_matter = yaml.dump(object_type["drank"][0]["properties"])
         else:
             front_matter = yaml.dump(object_type)
 
@@ -144,44 +150,45 @@ def micropub_endpoint():
             ("like-of", "like"),
             ("repost-of", "repost"),
             ("bookmark-of", "bookmark"),
-            ("drank", "coffee"),
             ("watch-of", "watch")
         )
 
         for item in object_types:
             property_value, interaction_name = item
 
-            if object_type.get(property_value):
-                return create_items.process_social(repo, front_matter, interactions.get(interaction_name), content)
-            elif object_type["properties"].get(property_value):
+            if object_type.get(property_value) or object_type["properties"].get(property_value):
                 return create_items.process_social(repo, front_matter, interactions.get(interaction_name), content)
 
         if action == "delete":
             validate_scope("delete", scopes)
             return create_items.delete_post(repo, url)
-        elif action == "undelete":
+
+        if action == "undelete":
             validate_scope("undelete", scopes)
             return create_items.undelete_post(repo, url)
-        elif action == "update":
+
+        if action == "update":
             validate_scope("update", scopes)
             return create_items.update_post(repo, url, front_matter, content)
-        elif object_type.get("properties") and object_type.get("properties").get("checkin"):
+
+        if object_type.get("properties") and object_type.get("properties").get("checkin"):
             return create_items.process_checkin(repo, front_matter, content)
-        elif post_type == "entry":
+
+        if post_type == "entry":
             return create_items.process_social(repo, front_matter, interactions.get("note"), content)
-        else:
-            return create_items.process_social(repo, front_matter, interactions.get("note"), content)
+        
+        return create_items.process_social(repo, front_matter, interactions.get("note"), content)
 
     if request.args.get("q") and request.args.get("q") == "config":
         # This is deliberately empty to comply with the micropub spec
         response = {"media-endpoint": MEDIA_ENDPOINT_URL, "syndicate-to": []}
         return jsonify(response)
 
-    elif request.args.get("q") and request.args.get("q") == "syndicate-to":
+    if request.args.get("q") and request.args.get("q") == "syndicate-to":
         response = {"syndicate-to": []}
         return jsonify(response)
         
-    elif request.args.get("q") and request.args.get("q") == "source" and request.args.get("url"):
+    if request.args.get("q") and request.args.get("q") == "source" and request.args.get("url"):
         try:
             folder = request.args.get("url").split("/")[-2]
             url = request.args.get("url").split("/")[-1]
@@ -208,14 +215,14 @@ def micropub_endpoint():
             return jsonify(response), 200
         except:
             abort(404)
-    else:
-        return abort(400)
+    
+    return abort(400)
 
 @micropub.route("/media", methods=["POST"])
 def media_endpoint():
     has_valid_token, scopes = verify_user(request)
 
-    if has_valid_token == False:
+    if has_valid_token is False:
         abort(403)
 
     # the "media" scope is required to use the endpoint
@@ -228,7 +235,7 @@ def media_endpoint():
 
         file = request.files.get("file")
         
-        if file == None:
+        if file is None:
             return jsonify({"message": "Please send a file."}), 400
 
         # get file extension
@@ -246,7 +253,7 @@ def media_endpoint():
 
         file.save(os.path.join(UPLOAD_FOLDER, filename))
 
-        if ext == ".jpg" or ext == ".jpeg":
+        if ext in (".jpg", ".jpeg"):
             image_file_local = Image.open(os.path.join(UPLOAD_FOLDER, filename))
             image_file_local = ImageOps.exif_transpose(image_file_local)
             image_file_local.thumbnail((1200, 750))

@@ -1,19 +1,45 @@
-from config import *
+import os
+import string
+import random
+import datetime
+
 from flask import jsonify
 from werkzeug.utils import secure_filename
 from bs4 import BeautifulSoup
-from . import micropub_helper
+import indieweb_utils
 from github import Github
-from . import colors
-import datetime
+import mimetypes
 import requests
-import context
-import string
-import random
 import yaml
-import os
+
+from config import GITHUB_KEY, HOME_FOLDER, GOOGLE_API_KEY
+from . import micropub_helper
 
 g = Github(GITHUB_KEY)
+            
+def save_file_from_context(url):
+    photo_request = requests.get(url)
+
+    file_name = None
+
+    if photo_request.status_code == 200:
+        fifteen_random_letters = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
+        
+        mime_type = mimetypes.guess_type(url)
+
+        if mime_type:
+            ext_text = mimetypes.guess_extension(mime_type[0])
+
+            file_name = fifteen_random_letters + ext_text
+
+            repo = g.get_repo("capjamesg/jamesg.blog")
+
+            with open(HOME_FOLDER + f"{file_name}", "wb") as file:
+                file.write(photo_request.content)
+
+            repo.create_file("assets/" + file_name, "create image for micropub client", photo_request.content, branch="main")
+
+    return file_name
 
 def process_social(repo, front_matter, interaction, content=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -34,11 +60,7 @@ def process_social(repo, front_matter, interaction, content=None):
     else:
         target = None
 
-    no_targets = ["coffee", "rsvp", "note", "watch-of"]
-
-    if not target and interaction.get("attribute") not in no_targets:
-        return jsonify({"message": f"Please enter a {interaction.get('attribute')} target."}), 400
-    elif target and type(target) == str and (target.startswith("https://") or target.startswith("http://")):
+    if target and isinstance(target, str) and (target.startswith("https://") or target.startswith("http://")):
         title_req = requests.get(target)
 
         soup = BeautifulSoup(title_req.text, "lxml")
@@ -48,13 +70,28 @@ def process_social(repo, front_matter, interaction, content=None):
         else:
             title = target.replace("https://", "").replace("http://", "")
 
-    if target and interaction.get("attribute") not in no_targets:
-        h_entry, _ = context.get_reply_context(target)
+    if target:
+        h_entry, _ = indieweb_utils.get_reply_context(target)
 
         if h_entry:
             json_content["context"] = h_entry
 
-    if (content == None or content == "") and target:
+        if h_entry.get("author") and h_entry["author"].get("photo"):
+            file_name = save_file_from_context(h_entry["author"]["photo"])
+
+            if file_name != None:
+                h_entry["author"]["photo"] = f"/assets/{file_name}"
+
+        if h_entry.get("post_photo_url"):
+            file_name = save_file_from_context(h_entry["post_photo_url"])
+
+            if file_name != None:
+                h_entry["author"]["photo"] = f"/assets/{file_name}"
+
+        # save target url to wayback machine
+        requests.get("https://web.archive.org/save/" + target)
+
+    if (content is None or content == "") and target:
         content = f"I {interaction.get('keyword')} <a href='{target}' class='u-{interaction.get('attribute')}'>{title}</a>."
         title = f"{interaction.get('keyword').title()} {title}"
     else:
@@ -62,21 +99,28 @@ def process_social(repo, front_matter, interaction, content=None):
 
     front_matter = yaml.dump(json_content)
 
-    random_sequence = "".join(random.sample(string.ascii_letters, 3))
+    # random_sequence = "".join(random.sample(string.ascii_letters, 3))
 
-    with open(HOME_FOLDER + f"random-{random_sequence}.txt", "w+") as f:
-        f.write(content)
+    # with open(HOME_FOLDER + f"random-{random_sequence}.txt", "w+") as f:
+    #     f.write(content)
     
-    if "<pre lang='python'>" in content:
-        with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
-            content = colors.get_rendered_html(f.read(), "python")
-    elif "<pre lang='bash'>" in content:
-        with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
-            content = colors.get_rendered_html(f.read(), "bash")
+    # if "<pre lang='python'>" in content:
+    #     with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
+    #         content = colors.get_rendered_html(f.read(), "python")
+    # elif "<pre lang='bash'>" in content:
+    #     with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
+    #         content = colors.get_rendered_html(f.read(), "bash")
 
-    os.remove(HOME_FOLDER + f"random-{random_sequence}.txt")
+    # os.remove(HOME_FOLDER + f"random-{random_sequence}.txt")
 
-    return write_to_file(front_matter, content, repo, title, interaction.get("folder"), category=interaction.get("category")), 201
+    return write_to_file(
+        front_matter,
+        content,
+        repo,
+        title,
+        interaction.get("folder"),
+        category=interaction.get("category")
+    ), 201
 
 def process_checkin(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -85,38 +129,47 @@ def process_checkin(repo, front_matter, content):
 
     source = None
 
-    if json_content.get("syndication") and type(json_content.get("syndication")) == list and \
+    if json_content.get("syndication") and isinstance(json_content.get("syndication"), list) and \
         json_content.get("syndication")[0].startswith("https://www.swarmapp.com"):
         source = "swarm"
 
     if source != "swarm":
-
         if not json_content.get("name")[0] or not json_content.get("latitude") or not json_content.get("longitude"):
             return jsonify({"message": "Please enter a venue name, latitude, and longitude."}), 400
 
         if not json_content.get("street_address") or not json_content.get("locality") \
             or not json_content.get("region") or not json_content.get("country_name"):
-            r = requests.get(
-                f"https://maps.googleapis.com/maps/api/geocode/json?latlng={json_content.get('latitude')},{json_content.get('longitude')}&key={GOOGLE_API_KEY}"
-            )
+
+            url_params = f"latlng={json_content.get('latitude')},{json_content.get('longitude')}&key={GOOGLE_API_KEY}"
+
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?{url_params}"
+            
+            r = requests.get(url)
 
             if r.status_code == 200:
                 data = r.json()
 
                 if len(data["results"]) > 0:
+                    results = data["results"][0]
+
                     if not json_content.get("street_address"):
-                        json_content["street_address"] = data["results"][0]["formatted_address"]
+                        json_content["street_address"] = results["formatted_address"]
                     
                     if not json_content.get("locality"):
-                        json_content["locality"] = data["results"][0]["address_components"][2]["long_name"]
+                        json_content["locality"] = results["address_components"][2]["long_name"]
                     
                     if not json_content.get("region"):
-                        json_content["region"] = data["results"][0]["address_components"][4]["long_name"]
+                        json_content["region"] = results["address_components"][4]["long_name"]
 
                     if not json_content.get("country_name"):
-                        json_content["country_name"] = data["results"][0]["address_components"][-2]["long_name"]
+                        json_content["country_name"] = results["address_components"][-2]["long_name"]
 
-        slug = json_content.get("name")[0].replace(" ", "-").replace(".", "-").replace("-", "").replace(",", "").lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
+        slug = json_content.get("name")[0] \
+            .replace(" ", "-") \
+            .replace(".", "-") \
+            .replace("-", "") \
+            .replace(",", "") \
+            .lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
 
         if not content:
             content = f"Checked in to {json_content.get('name')[0].replace(':', '')}."
@@ -146,9 +199,9 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
     json_content["published"] = datetime.datetime.now()
 
     if not json_content.get("category"):
-        if category != None and type(category) == list:
+        if category is not None and isinstance(category, list):
             json_content["category"] = category
-        elif category != None and type(category) == str:
+        elif category is not None and isinstance(category, str):
             json_content["category"] = [category]
 
     if post_name:
@@ -160,11 +213,19 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         else:
             json_content["sitemap"] = "true"
 
-    if json_content.get("syndication") and json_content["syndication"][0] == "twitter":
-        del json_content["syndication"]
+    if json_content.get("syndication") and "twitter" in json_content["syndication"]:
+        twitter_syndication_string = """
+        \n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p>
+        <a href='https://brid.gy/publish/twitter'></a>
+        """
 
-        content = content + "\n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p> <a href='https://brid.gy/publish/twitter'></a>"
-        
+        content = content + twitter_syndication_string
+
+    # add brid.gy fed link so posts can be syndicated to the fediverse
+    # do this for all posts for now
+    # if json_content.get("syndication") and "fediverse" in json_content["syndication"]:
+    content = content + "\n<a href='https://fed.brid.gy/'></a>"
+    
     json_content["posted_using"] = "my Micropub server"
     json_content["posted_using_url"] = "https://github.com/capjamesg/micropub"
 
@@ -179,7 +240,12 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         file.write(content)
 
     with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "r") as file:
-        repo.create_file(f"{folder_name}/" + slug + ".md", "create post from micropub client", file.read(), branch="main")
+        repo.create_file(
+            f"{folder_name}/" + slug + ".md",
+            "create post from micropub client",
+            file.read(),
+            branch="main"
+        )
 
     resp = jsonify({"message": "Created"})
     resp.headers["Location"] = f"https://jamesg.blog/{folder_name.replace('_', '')}/{slug}"
@@ -195,10 +261,15 @@ def undelete_post(repo, url):
 
     contents, _, folder = micropub_helper.check_if_exists(url, repo, get_contents=False)
     
-    if contents == None and folder == None:
+    if contents is None and folder is None:
         return jsonify({"message": "The post you tried to undelete does not exist."}), 404
-
-    repo.create_file(folder + "/" + url + ".md", "undelete post from micropub server", contents, branch="main")
+    
+    repo.create_file(
+        folder + "/" + url + ".md",
+        "undelete post from micropub server",
+        contents,
+        branch="main"
+    )
 
     return jsonify({"message": "Post undeleted."}), 200
 
@@ -214,7 +285,7 @@ def delete_post(repo, url):
 
     contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo)
     
-    if contents == None and repo_file_contents == None and folder == None:
+    if contents is None and repo_file_contents is None and folder is None:
         return jsonify({"message": "The post you tried to undelete does not exist."}), 404
 
     contents = repo.get_contents(folder + "/" + url + ".md")
@@ -232,12 +303,15 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
         return jsonify({"message": "Please provide a url."}), 400
 
     url = url.split("/")[-1]
-    url = "".join([char for char in url if char.isalnum() or char == " " or char == "-" or char == "_"]).lower()
+
+    char_comprehension = [char for char in url if char.isalnum() or char == " " or char == "-" or char == "_"]
+
+    url = "".join(char_comprehension).lower()
     url = url.replace(" ", "-")
 
     contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo)
     
-    if contents == None and repo_file_contents == None and folder == None:
+    if contents is None and repo_file_contents is None and folder is None:
         return jsonify({"message": "Post not found."}), 404
 
     with open(HOME_FOLDER + f"{folder}/{url}.md", "r") as file:
@@ -245,43 +319,46 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
 
     end_of_yaml = content[1:].index("---\n") + 1
 
-    yaml_to_json = yaml.load("".join([c for c in content[:end_of_yaml] if "---" not in c]), Loader=yaml.SafeLoader)
+    yaml_string = "".join([c for c in content[:end_of_yaml] if "---" not in c])
+
+    yaml_to_json = yaml.load(yaml_string, Loader=yaml.SafeLoader)
 
     if yaml.load(front_matter).get("replace"):
-        if type(yaml.load(front_matter).get("replace")) != list:
+        if not isinstance(yaml.load(front_matter).get("replace"), list):
             return jsonify({"message": "This is not a valid update request."}), 400
         user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["replace"]
 
-        for k, v in user_front_matter_to_json.items():
+        for k in user_front_matter_to_json:
             if k in yaml_to_json.keys():
                 yaml_to_json[k] = user_front_matter_to_json[k][0]
 
-    elif yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"):
-        if type(yaml.load(front_matter, Loader=yaml.SafeLoader).get("add")) != list:
+    if yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"):
+        if not isinstance(yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"), list):
             return jsonify({"message": "This is not a valid add request."}), 400
             
         user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["add"]
 
-        for k, v in user_front_matter_to_json.items():
-            if k in yaml_to_json.keys() and k != None:
-                if yaml_to_json[k] == None:
+        for k in user_front_matter_to_json:
+            if k in yaml_to_json.keys() and k is not None:
+                if yaml_to_json[k] is None:
                     yaml_to_json[k] == user_front_matter_to_json[k]
                 else:
                     yaml_to_json[k] += user_front_matter_to_json[k]
             else:
                 yaml_to_json[k] = user_front_matter_to_json[k]
 
-    elif yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"):
-        if type(yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete")) != list:
+    if yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"):
+        if not isinstance(yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"), list):
             return jsonify({"message": "This is not a valid delete request."}), 400
         user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["delete"]
 
-        if type(user_front_matter_to_json) == dict:
-            for k, v in user_front_matter_to_json.items():
+        if isinstance(user_front_matter_to_json) == dict:
+            for k in user_front_matter_to_json:
                 if k in yaml_to_json.keys():
                     for item in user_front_matter_to_json[k]:
                         yaml_to_json[k].remove(item)
-        elif type(user_front_matter_to_json) == list:
+
+        elif isinstance(user_front_matter_to_json) == list:
             for item in user_front_matter_to_json:
                 if item in yaml_to_json.keys():
                     yaml_to_json.pop(item)
@@ -293,7 +370,13 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
         file.write(full_contents_for_writing)
 
     with open(HOME_FOLDER + f"{folder}/{url}.md", "r") as file:
-        repo.update_file(f"{folder}/{url}.md", "update post via micropub", file.read(), repo_file_contents.sha, branch="main")
+        repo.update_file(
+            f"{folder}/{url}.md",
+            "update post via micropub",
+            file.read(),
+            repo_file_contents.sha,
+            branch="main"
+        )
 
     resp = jsonify({"message": "Post updated."})
     resp.headers["Location"] = original_url

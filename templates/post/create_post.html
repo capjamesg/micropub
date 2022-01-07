@@ -8,36 +8,7 @@
         {% endfor %}
         {% endif %}
     {% endwith %}
-    {% if post_type == "coffee" %}
-    <h1>Create a coffee post ☕</h1>
-    <p>Use the form below to share the coffee you are drinking on your personal website.</p>
-    <form action="/post" method="POST" enctype="multipart/form-data">
-        <label for="title">Post title:</label><br>
-        <input type="text" name="title" id="title" placeholder="I am drinking..." required /><br>
-        <label for="content">Post contents (optional):</label><br>
-        <textarea name="content" id="content" rows="20"></textarea><br>
-        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
-            <label for="photo">Post image (optional):</label><br>
-            <input type="file" name="photo" id="photo" accept="image/*"><br>
-            <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
-            <input type="text" name="image_alt_text" id="image_alt_text" placeholder="A bag of coffee"/><br>
-        {% endif %}
-        <label for="roaster">Roaster (optional):</label><br>
-        <input type="text" name="roaster" id="roaster" placeholder="Fortitude Coffee" /><br>
-        <label for="varietals">Varietal(s) (optional):</label><br>
-        <input type="text" name="varietals" id="varietals" placeholder="SL24, SL-28..." /><br>
-        <label for="country">Country (optional):</label><br>
-        <input type="text" name="country" id="country" placeholder="Kenya" /><br>
-        <label for="process">Process (optional):</label><br>
-        <input type="text" name="process" id="process" placeholder="Natural" /><br>
-        <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
-        <input type="hidden" name="category" id="category" value="Coffee" required />
-        <input type="hidden" name="h" id="h" value="entry" required />
-        <input type="hidden" name="drank" id="drank" value="drank" required />
-        <input type="hidden" name="action" id="action" value="create" required />
-        <input type="submit" value="Submit post">
-    </form>
-    {% elif post_type == "photo" %}
+    {% if post_type == "photo" %}
     <h1>Upload a photo to your website 📷</h1>
     <p>Use the form below to upload a picture to your website.</p>
     <form action="/media-forward" method="POST" enctype="multipart/form-data">

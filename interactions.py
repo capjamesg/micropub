@@ -47,12 +47,5 @@ interactions = {
         "folder": "_watches",
         "category": "Watch",
         "layout": "social_post"
-    },
-    "coffee": {
-        "attribute": "coffee",
-        "keyword": "",
-        "folder": "_coffee",
-        "category": "Coffee",
-        "layout": "social_post"
     }
 }

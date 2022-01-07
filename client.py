@@ -1,19 +1,14 @@
-from flask import request, render_template, redirect, session, Blueprint, flash, jsonify, abort, send_from_directory
-from werkzeug.utils import secure_filename
-from context import get_reply_context
-from bs4 import BeautifulSoup
-from github import Github
-from config import *
-import requests
 import os
 
+from flask import request, render_template, redirect, session, Blueprint, flash, jsonify, abort, send_from_directory
+from werkzeug.utils import secure_filename
+import indieweb_utils
+from bs4 import BeautifulSoup
+import requests
+
+from config import ENDPOINT_URL, UPLOAD_FOLDER, MEDIA_ENDPOINT_URL, CLIENT_ID
+
 client = Blueprint("client", __name__, static_folder="static", static_url_path="")
-
-g = Github(GITHUB_KEY)
-
-# @client.route("/editor", methods=["GET"])
-# def editor_page():
-#     return render_template("post/editor.html")
 
 @client.route("/", methods=["GET", "POST"])
 def index():
@@ -34,35 +29,70 @@ def index():
                     flash("You do not have permission to update posts.")
                     return redirect("/")
 
-                r = requests.post(ENDPOINT_URL,
-                    json={"type": ["h-entry"], "action": "delete", "url": url},
-                    headers={"Authorization": f"Bearer {user}"})
-                if r.status_code == 200 or r.status_code == 201:
+                http_request = requests.post(
+                    ENDPOINT_URL,
+                    json={
+                        "type": ["h-entry"],
+                        "action": "delete",
+                        "url": url
+                    },
+                    headers={
+                        "Authorization": f"Bearer {user}"
+                    }
+                )
+                if http_request.status_code == 200 or http_request.status_code == 201:
                     flash(f"Your {url} post was successfully deleted.")
                 else:
-                    flash(r.json()["message"].strip("."))
+                    flash(http_request.json()["message"].strip("."))
                 return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
             elif request.form["action"] == "undelete":
                 if session.get("scopes") and not "undelete" in session.get("scopes").split(" "):
                     flash("You do not have permission to undelete posts.")
                     return redirect("/")
-                r = requests.post(ENDPOINT_URL,
-                    json={"type": ["h-entry"], "action": "undelete", "url": url},
-                    headers={"Authorization": f"Bearer {user}"})
-                if r.status_code == 200 or r.status_code == 201:
+
+                http_request = requests.post(
+                    ENDPOINT_URL,
+                    json={
+                        "type": ["h-entry"],
+                        "action": "undelete",
+                        "url": url
+                    },
+                    headers={
+                        "Authorization": f"Bearer {user}"
+                    }
+                )
+                if http_request.status_code == 200 or http_request.status_code == 201:
                     flash(f"Your {url} post was successfully undeleted.")
                 else:
-                    flash(r.json()["message"].strip("."))
-                return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="undelete")
-            else:
-                return redirect("/")
-        else:
-            abort(403)
+                    flash(http_request.json()["message"].strip("."))
+                return render_template(
+                    "user/dashboard.html",
+                    user=user,
+                    me=me,
+                    title="Home | Micropub Endpoint",
+                    action="undelete"
+                )
 
-    if user != None:
-        return render_template("user/dashboard.html", user=user, me=me, title="Dashboard | Micropub Endpoint", action=None)
+            return redirect("/")
+
+        abort(403)
+
+    if user is not None:
+        return render_template(
+            "user/dashboard.html",
+            user=user,
+            me=me,
+            title="Dashboard | Micropub Endpoint",
+            action=None
+        )
     else:
-        return render_template("index.html", user=user, me=me, title="Home | Micropub Endpoint", action=None)
+        return render_template(
+            "index.html",
+            user=user,
+            me=me,
+            title="Home | Micropub Endpoint",
+            action=None
+        )
 
 @client.route("/post", methods=["GET", "POST"])
 def create_post():
@@ -81,7 +111,6 @@ def create_post():
         ("rsvp", "rsvp"),
         ("reply", "in-reply-to"),
         ("checkin", ""),
-        ("coffee", ""),
         ("checkin", ""),
         ("photo", ""),
         ("watch", "")
@@ -95,7 +124,7 @@ def create_post():
             url = request.args.get(attribute)
             request_type = attribute
 
-    if post_type == "photo" and session.get("scopes") and "media" not in session.get("scopes").split(" "):
+    if post_type == "photo" and "media" not in session.get("scopes").split(" "):
         flash("You need to grant the 'media' scope to upload photos.")
         return redirect("/")
 
@@ -109,9 +138,11 @@ def create_post():
             post_type = None
             if request.form.get("like-of"):
                 return redirect(f"/post?type=like&like-of={request.form.get('like-of')}&is_previewing=true")
-            elif request.form.get("bookmark-of"):
+
+            if request.form.get("bookmark-of"):
                 return redirect(f"/post?type=bookmark&bookmark-of={request.form.get('bookmark-of')}&is_previewing=true")
-            elif request.form.get("repost-of"):
+
+            if request.form.get("repost-of"):
                 return redirect(f"/post?type=repost&repost-of={request.form.get('repost-of')}&is_previewing=true")
 
         if me and user:
@@ -135,21 +166,7 @@ def create_post():
             if request.form.get("syndication") and request.form.get("syndication") != "none":
                 data["syndication"] = [request.form.get("syndication")]
 
-            # if roaster or varietals or country
-            if request.form.get("drank"):
-                data["drank"] = [{
-                    "properties": {
-                        "title": [request.form.get("title")],
-                        "content": [request.form.get("content")],
-                        "category": request.form.get("category").split(", "),
-                        "coffee_info": {}
-                    }
-                }]
-                if request.form.get("content") and BeautifulSoup(request.form.get("content"), "lxml") \
-                    and BeautifulSoup(request.form.get("content"), "lxml").find():
-
-                    data["drank"][0]["properties"]["content"] = [{"html": request.form.get("content")}]
-            elif request.form.get("category") == "RSVP":
+            if request.form.get("category") == "RSVP":
                 data["p-rsvp"] = {}
                 data["p-rsvp"]["properties"] = {
                     "event_name": request.form.get("event_name"),
@@ -191,14 +208,8 @@ def create_post():
                     data["properties"]["is_hidden"] = [request.form.get("is_hidden")]
                 if request.form.get("content") and BeautifulSoup(request.form.get("content"), "lxml") and BeautifulSoup(request.form.get("content"), "lxml").find():
                     data["properties"]["content"] = [{"html": request.form.get("content")}]
-                elif request.form.get("content") and request.form.get("content") != None:
+                elif request.form.get("content") and request.form.get("content") is not None:
                     data["properties"]["content"] = [request.form.get("content")]
-
-            coffee_info_properties = ["roaster", "varietals", "country", "process"]
-
-            for prop in coffee_info_properties:
-                if request.form.get(prop):
-                    data["drank"][0]["properties"]["coffee_info"][prop] = [request.form.get(prop)]
 
             photo = request.files.get("photo")
 
@@ -208,23 +219,28 @@ def create_post():
                 # if session.get("config"):
                 #     photo_r = requests.post(session["config"]["media-endpoint"], files={"file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')}, headers={"Authorization": "Bearer " + user})
                 # else:
-                photo_r = requests.post(MEDIA_ENDPOINT_URL,
-                    files={"file": (secure_filename(photo.filename),open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"), 'image/jpeg')},
-                    headers={"Authorization": "Bearer " + user})
+                photo_http_request = requests.post(
+                    MEDIA_ENDPOINT_URL,
+                    files={
+                        "file": (
+                            secure_filename(photo.filename),
+                            open(os.path.join(UPLOAD_FOLDER, secure_filename(photo.filename)), "rb"),
+                            'image/jpeg'
+                        )
+                    },
+                    headers={
+                        "Authorization": "Bearer " + user
+                    }
+                )
 
                 check_for_alt_text = False
 
-                if photo and not request.form.get("drank"):
-                    data["properties"]["photo"] = [{ "value": photo_r.headers["Location"] }]
-                    check_for_alt_text = True
-                elif photo and request.form.get("drank"):
-                    data["drank"][0]["properties"]["photo"] = [{ "value": photo_r.headers["Location"] }]
+                if photo:
+                    data["properties"]["photo"] = [{ "value": photo_http_request.headers["Location"] }]
                     check_for_alt_text = True
 
-                if check_for_alt_text and request.form.get("image_alt_text") and not request.form.get("drank"):
+                if check_for_alt_text and request.form.get("image_alt_text"):
                     data["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
-                elif check_for_alt_text and request.form.get("image_alt_text") and request.form.get("drank"):
-                    data["drank"][0]["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
 
             if request.form.get("format") == "form_encoded":
                 form_encoded["h"] = "entry"
@@ -234,30 +250,31 @@ def create_post():
                         categories += [i]
                 form_encoded["category[]"] = categories
 
-                r = requests.post(ENDPOINT_URL, data=form_encoded, headers={"Authorization": f"Bearer {user}"})
+                http_request = requests.post(ENDPOINT_URL, data=form_encoded, headers={"Authorization": f"Bearer {user}"})
             else:
-                r = requests.post(ENDPOINT_URL, json=data, headers={"Authorization": f"Bearer {user}"})
+                http_request = requests.post(ENDPOINT_URL, json=data, headers={"Authorization": f"Bearer {user}"})
 
             try:
-                response = r.json()
+                response = http_request.json()
             except:
-                response = r.text
+                response = http_request.text
 
-            if r.status_code != 200 and r.status_code != 201:
+            if http_request.status_code != 200 and http_request.status_code != 201:
                 flash("Error: " + str(response["message"]))
-            elif r.headers.get("Location"):
-                return redirect(r.headers["Location"])
-            else:
-                flash("Your post was successfully created.")
+
+            if http_request.headers.get("Location"):
+                return redirect(http_request.headers["Location"])
+           
+            flash("Your post was successfully created.")
 
             title = "Create Post"
             
             return render_template("post/create_post.html", title=title, post_type=post_type, user=user, me=me)
-        else:
-            return jsonify({"error": "You must be logged in to create a post."}), 401
+        
+        return jsonify({"error": "You must be logged in to create a post."}), 401
 
-    if request_type != None and url:
-        h_entry, site_supports_webmention = get_reply_context(url)
+    if request_type is not None and url:
+        h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url)
     else:
         h_entry = None
         site_supports_webmention = False
@@ -281,7 +298,7 @@ def create_post():
 
 @client.route("/update", methods=["GET", "POST"])
 def update_post():
-    id = request.args.get("url")
+    post_id = request.args.get("url")
 
     if session.get("access_token"):
         user = session["access_token"]
@@ -293,19 +310,17 @@ def update_post():
         flash("You do not have permission to update posts.")
         return redirect("/")
 
-    if "/checkin/" in id:
+    if "/checkin/" in post_id:
         post_type = "checkin"
-    elif "/coffee/" in id:
-        post_type = "coffee"
-    elif "/rsvp/" in id:
+    elif "/rsvp/" in post_id:
         post_type = "rsvp"
-    elif "/webmentions/" in id:
+    elif "/webmentions/" in post_id:
         post_type = "reply"
     else:
         post_type = "note"
 
     try:
-        properties = requests.get(ENDPOINT_URL + "?q=source&url=" + id,
+        properties = requests.get(ENDPOINT_URL + "?q=source&url=" + post_id,
             headers={"Authorization": f"Bearer {user}"})
 
         properties = properties.json()
@@ -318,7 +333,7 @@ def update_post():
         if me and user:
             data = {
                 "action": "update",
-                "url": id,
+                "url": post_id,
                 "replace": {}
             }
 
@@ -353,30 +368,30 @@ def update_post():
             elif request.form.get("in-reply-to"):
                 data["in-reply-to"] = request.form.get("in-reply-to")
 
-            r = requests.post(ENDPOINT_URL, json=data, headers={
+            http_request = requests.post(ENDPOINT_URL, json=data, headers={
                 "Authorization": f"Bearer {user}", "Content-Type": "application/json"
             })
 
             try:
-                response = r.json()
+                response = http_request.json()
 
-                if r.status_code != 200 and r.status_code != 201:
+                if http_request.status_code != 200 and http_request.status_code != 201:
                     flash("Error: " + str(response["message"]))
                 else:
-                    return redirect(r.headers["Location"])
+                    return redirect(http_request.headers["Location"])
             except:
-                flash("There was an unknown server error.")
+                flash("There was an unknown server errohttp_request.")
             
             return render_template(
                 "post/update_post.html",
                 title=title,
                 post_type=post_type,
                 user=user, me=me,
-                id=id,
+                id=post_id,
                 properties=properties
             )
-        else:
-            return jsonify({"error": "You must be logged in to create a post."}), 401
+        
+        return jsonify({"error": "You must be logged in to create a post."}), 401
 
     return render_template(
         "post/update_post.html",
@@ -447,15 +462,25 @@ def forward_media_query():
 
     photo.save(os.path.join(UPLOAD_FOLDER, filename))
 
-    r = requests.post(MEDIA_ENDPOINT_URL,
-        files={"file": (filename ,open(os.path.join(UPLOAD_FOLDER, filename), "rb"), 'image/jpeg')},
-        headers={"Authorization": f"Bearer {session['access_token']}"})
+    http_request = requests.post(
+        MEDIA_ENDPOINT_URL,
+        files={
+            "file": (
+                filename,
+                open(os.path.join(UPLOAD_FOLDER, filename), "rb"),
+                'image/jpeg'
+            )
+        },
+        headers={
+            "Authorization": f"Bearer {session['access_token']}"
+        }
+    )
 
-    if r.status_code != 201:
-        flash("Error: " + str(r.json()["message"]))
+    if http_request.status_code != 201:
+        flash("Error: " + str(http_request.json()["message"]))
         return redirect("/post?type=photo")
 
-    location_header = r.headers["Location"]
+    location_header = http_request.headers["Location"]
 
     return redirect(location_header)
 
