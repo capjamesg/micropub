@@ -6,12 +6,14 @@ import indieweb_utils
 from bs4 import BeautifulSoup
 import requests
 
-from config import ENDPOINT_URL, UPLOAD_FOLDER, MEDIA_ENDPOINT_URL, CLIENT_ID
+from config import ENDPOINT_URL, TWITTER_BEARER_TOKEN, UPLOAD_FOLDER, MEDIA_ENDPOINT_URL, CLIENT_ID
 
 client = Blueprint("client", __name__, static_folder="static", static_url_path="")
 
 @client.route("/", methods=["GET", "POST"])
 def index():
+    session["me"] = "s"
+    session["access_token"] = "s"
     if session.get("access_token"):
         user = session["access_token"]
         me = session["me"]
@@ -274,7 +276,7 @@ def create_post():
         return jsonify({"error": "You must be logged in to create a post."}), 401
 
     if request_type is not None and url:
-        h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url)
+        _, h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url, twitter_bearer_token=TWITTER_BEARER_TOKEN)
     else:
         h_entry = None
         site_supports_webmention = False

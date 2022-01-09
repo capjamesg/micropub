@@ -12,7 +12,7 @@ import mimetypes
 import requests
 import yaml
 
-from config import GITHUB_KEY, HOME_FOLDER, GOOGLE_API_KEY
+from config import GITHUB_KEY, HOME_FOLDER, GOOGLE_API_KEY, TWITTER_BEARER_TOKEN
 from . import micropub_helper
 
 g = Github(GITHUB_KEY)
@@ -71,7 +71,7 @@ def process_social(repo, front_matter, interaction, content=None):
             title = target.replace("https://", "").replace("http://", "")
 
     if target:
-        h_entry, _ = indieweb_utils.get_reply_context(target)
+        _, h_entry, _ = indieweb_utils.get_reply_context(target, twitter_bearer_token=TWITTER_BEARER_TOKEN)
 
         if h_entry:
             json_content["context"] = h_entry

@@ -18,6 +18,18 @@ if SENTRY_DSN != "":
 def create_app():
     app = Flask(__name__)
 
+    # set secret key
+    app.config['SECRET_KEY'] = os.urandom(32)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///auth.db'
+    app.config['TOKEN_ENDPOINT'] = "https://auth.jamesg.blog/token"
+    app.config['ME'] = "https://jamesg.blog"
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['REMEMBER_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_TYPE'] = "filesystem"
+
+
     app.config.from_object(__name__)
 
     sess = Session()
