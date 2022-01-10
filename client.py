@@ -279,6 +279,8 @@ def create_post():
         h_entry = None
         site_supports_webmention = False
 
+    print(h_entry)
+
     is_previewing = False
 
     if request.args.get("is_previewing") and request.args.get("is_previewing") == "true":

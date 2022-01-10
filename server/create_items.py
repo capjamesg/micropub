@@ -27,7 +27,7 @@ def save_file_from_context(url):
         
         mime_type = mimetypes.guess_type(url)
 
-        if mime_type:
+        if mime_type[0] is not None:
             ext_text = mimetypes.guess_extension(mime_type[0])
 
             file_name = fifteen_random_letters + ext_text
