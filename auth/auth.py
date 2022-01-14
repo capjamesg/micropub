@@ -37,6 +37,8 @@ def indieauth_callback():
     session["me"] = response.get("me")
     session["access_token"] = response.get("access_token")
     session["scope"] = response.get("scope")
+    
+    session.permanent = True
 
     return redirect("/")
 

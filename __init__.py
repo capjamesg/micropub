@@ -1,5 +1,6 @@
 from flask import Flask, render_template, session
 from flask_session import Session
+from datetime import timedelta
 from config import SENTRY_DSN, SENTRY_SERVER_NAME
 import os
 
@@ -29,6 +30,8 @@ def create_app():
     app.config['REMEMBER_COOKIE_HTTPONLY'] = True
     app.config['SESSION_TYPE'] = "filesystem"
 
+    # set maximum lifetime for session
+    app.permanent_session_lifetime = timedelta(days=120)
 
     app.config.from_object(__name__)
 
