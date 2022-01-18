@@ -14,7 +14,7 @@ def indieauth_callback():
     state = request.args.get("state")
 
     # these are the scopes necessary for the application to run
-    required_scopes = ["read", "channels"]
+    required_scopes = ["create"]
 
     message, response = indieauth_callback_handler(
         code,
