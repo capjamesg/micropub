@@ -280,7 +280,7 @@ def create_post():
         return jsonify({"error": "You must be logged in to create a post."}), 401
 
     if request_type is not None and url:
-        h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url, twitter_bearer_token=TWITTER_BEARER_TOKEN)
+        site_supports_webmention, h_entry = indieweb_utils.get_reply_context(url, twitter_bearer_token=TWITTER_BEARER_TOKEN)
     else:
         h_entry = None
         site_supports_webmention = False
