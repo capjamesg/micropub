@@ -499,6 +499,10 @@ def favicon():
 @client.route("/emojis.json")
 def emojis():
     return send_from_directory(client.static_folder, "emojis.json")
+    
+@client.route("/manifest.json")
+def web_app_manifest():
+    return send_from_directory("static", "manifest.json")
 
 @client.route("/emoji_autocomplete.js")
 def emoji_autocomplete():
