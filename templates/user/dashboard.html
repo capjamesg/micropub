@@ -19,7 +19,7 @@
             <h2>Create posts</h2>
             <p>You can:</p>
             <ul>
-                <li><a href="/post">Reply to a post 💬</a></li>
+                <li><a href="/post?type=reply">Reply to a post 💬</a></li>
                 <li><a href="/post?type=like">Like a post ❤️</a></li>
                 <li><a href="/post?type=note">Create a note 📝</a></li>
                 <li><a href="/post?type=rsvp">Create an RSVP 📅</a></li>
@@ -32,7 +32,7 @@
             </ul>
         </section>
         {% if session.get("scope") and "update" in session.get("scope").split(" ") %}
-            <section class="box">
+            <section>
                 <h2>Update a post</h2>
                 <p>You can update a drinking post or reply you have already created.</p>
                 <form method="post" action="/">
@@ -44,7 +44,7 @@
             </section>
         {% endif %}
         {% if session.get("scope") and "delete" in session.get("scope").split(" ") %}
-            <section class="box">
+            <section>
                 <h2>Delete a post</h2>
                 <p>You can delete a drinking post, reply, or like.</p>
                 <form method="post" action="/">
@@ -56,7 +56,7 @@
             </section>
         {% endif %}
         {% if session.get("scope") and "undelete" in session.get("scope").split(" ") %}
-            <section class="box">
+            <section>
                 <h2>Undelete a post</h2>
                 <p>You can delete any post you have created.</p>
                 <form method="post" action="/">

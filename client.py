@@ -104,6 +104,8 @@ def create_post():
 
     post_type = request.args.get("type")
 
+    request_type = None
+
     accepted_post_types = (
         ("like", "like-of"),
         ("repost", "repost-of"),
@@ -278,7 +280,7 @@ def create_post():
         return jsonify({"error": "You must be logged in to create a post."}), 401
 
     if request_type is not None and url:
-        _, h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url, twitter_bearer_token=TWITTER_BEARER_TOKEN)
+        h_entry, site_supports_webmention = indieweb_utils.get_reply_context(url, twitter_bearer_token=TWITTER_BEARER_TOKEN)
     else:
         h_entry = None
         site_supports_webmention = False
