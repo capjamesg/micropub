@@ -242,6 +242,8 @@ def create_post():
                 if check_for_alt_text and request.form.get("image_alt_text"):
                     data["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
 
+            print(user, ENDPOINT_URL)
+
             if request.form.get("format") == "form_encoded":
                 form_encoded["h"] = "entry"
                 categories = []
@@ -255,12 +257,14 @@ def create_post():
                 http_request = requests.post(ENDPOINT_URL, json=data, headers={"Authorization": f"Bearer {user}"})
 
             try:
-                response = http_request.json()
+                response = http_request.json()["message"]
             except:
                 response = http_request.text
 
+            print(http_request.status_code)
+
             if http_request.status_code != 200 and http_request.status_code != 201:
-                flash("Error: " + str(response["message"]))
+                flash("Error: " + str(response))
 
             if http_request.headers.get("Location"):
                 return redirect(http_request.headers["Location"])
@@ -278,8 +282,6 @@ def create_post():
     else:
         h_entry = None
         site_supports_webmention = False
-
-    print(h_entry)
 
     is_previewing = False
 

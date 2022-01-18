@@ -49,6 +49,8 @@ def process_social(repo, front_matter, interaction, content=None):
     if json_content.get(interaction.get("attribute")):
         target = json_content.get(interaction.get("attribute"))[0]
 
+        print(target)
+
         if target.get("bookmark-of"):
             target = target.get("bookmark-of")
         elif target.get("like-of"):
@@ -76,20 +78,20 @@ def process_social(repo, front_matter, interaction, content=None):
         if h_entry:
             json_content["context"] = h_entry
 
-        if h_entry.get("author") and h_entry["author"].get("photo"):
-            file_name = save_file_from_context(h_entry["author"]["photo"])
+        # if h_entry.get("author") and h_entry["author"].get("photo"):
+        #     file_name = save_file_from_context(h_entry["author"]["photo"])
 
-            if file_name != None:
-                h_entry["author"]["photo"] = f"/assets/{file_name}"
+        #     if file_name != None:
+        #         h_entry["author"]["photo"] = f"/assets/{file_name}"
 
-        if h_entry.get("post_photo_url"):
-            file_name = save_file_from_context(h_entry["post_photo_url"])
+        # if h_entry.get("post_photo_url"):
+        #     file_name = save_file_from_context(h_entry["post_photo_url"])
 
-            if file_name != None:
-                h_entry["author"]["photo"] = f"/assets/{file_name}"
+        #     if file_name != None:
+        #         h_entry["author"]["photo"] = f"/assets/{file_name}"
 
         # save target url to wayback machine
-        requests.get("https://web.archive.org/save/" + target)
+        # requests.get("https://web.archive.org/save/" + target)
 
     if (content is None or content == "") and target:
         content = f"I {interaction.get('keyword')} <a href='{target}' class='u-{interaction.get('attribute')}'>{title}</a>."

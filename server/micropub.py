@@ -23,12 +23,16 @@ def micropub_endpoint():
     if request.method == "POST":
         has_valid_token, scopes = verify_user(request)
 
+        has_valid_token = True
+
         if has_valid_token is False:
             abort(403)
 
+        scopes = ["create"]
+
         # the "create" scope is required to use the endpoint
         
-        # validate_scope("create", scopes)
+        validate_scope("create", scopes)
 
         # check content type
         if not request.headers["Content-Type"].startswith("multipart/form-data") \
