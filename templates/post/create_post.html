@@ -28,7 +28,7 @@
         <textarea name="content" id="content" rows="20" required></textarea><br>
         <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
         <div id="possible_emojis"></div>
-        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+        {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
             <label for="photo">Post image (optional):</label><br>
             <input type="file" name="photo" id="photo" accept="image/*"><br>
             <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -65,7 +65,7 @@
         <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
         <div id="possible_emojis"></div>
         {% include "includes/reply_emojis.html" %}
-        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+        {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
             <label for="photo">Post image (optional):</label><br>
             <input type="file" name="photo" id="photo" accept="image/*"><br>
             <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>

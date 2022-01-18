@@ -18,7 +18,7 @@
         <textarea name="content" id="content" rows="20" required>{{ properties.get('properties').get('content')[0] }}</textarea><br>
         {% include "includes/reply_emojis.html" %}
         <div id="possible_emojis"></div>
-        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+        {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
             <label for="photo">Post image (optional):</label><br>
             <input type="file" name="photo" id="photo" accept="image/*"><br>
             <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
@@ -46,7 +46,7 @@
         <input type="number" name="longitude" id="longitude" step="any" value="{{ properties.get('properties').get('longitude') }}" required /><br>
         <label for="content">Post contents (optional):</label><br>
         <textarea name="content" id="content" rows="15">{{ properties.get('properties').get('content')[0] }}</textarea><br>
-        {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
+        {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
             <label for="photo">Post image (optional):</label><br>
             <input type="file" name="photo" id="photo" accept="image/*"><br>
             <label for="image_alt_text">Image alt text (optional, preferred if an image is supplied above):</label><br>
