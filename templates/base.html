@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{% if get_flashed_messages() %}{{ get_flashed_messages()[0] }} - {% endif %}{% if title %}{{ title }}{% else %}Micropub Endpoint{% endif %}</title>
+    <title>{% if get_flashed_messages() %}{{ get_flashed_messages()[0] }} - {% endif %}{% if title %}{{ title }}{% else %}WriteIt{% endif %}</title>
 
-    <meta name="description" content="Micropub lets you post content on your website.">
-    <meta name="twitter:description" content="Micropub lets you post content on your website.">
-    <meta name="og:description" content="Micropub lets you post content on your website.">
+    <meta name="description" content="WriteIt lets you post content on your website.">
+    <meta name="twitter:description" content="WriteIt lets you post content on your website.">
+    <meta name="og:description" content="WriteIt lets you post content on your website.">
   
-    <meta name="og:site_name" content="Micropub">
+    <meta name="og:site_name" content="WriteIt">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 
@@ -28,7 +28,7 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <link rel="manifest" href="/assets/manifest.json">
+    <link rel="manifest" href="/manifest.json">
 
     <style id="darkmode" media="none">
       @media (prefers-color-scheme: dark) {
@@ -61,18 +61,18 @@
   </head>
   <body>
     <main>
-      <a href="#main" class="accessibility_label">Skip to main content</a>
+      <a href="#main" class="accessibility_label_top">Skip to main content</a>
       {% if url_for(request.endpoint) != "/editor" %}
         <nav id="top_navigation">
-          <p><a href="/">Micropub Endpoint</a></p>
+          <p><a href="/">WriteIt</a></p>
           {% if user %}
           <ul>
-            <li><a href="/settings">Signed in as {{ me.replace("http://", "").strip("/") }}</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/settings">👤 {{ me.split("/")[2] }}</a></li>
+            <li><a href="/logout">🔒 Logout</a></li>
           </ul>
           {% else %}
           <ul>
-            <li><a href="/login">Login</a></li>
+            <li><a href="/login">🔒 Login</a></li>
           </ul>
           {% endif %}
         </nav>

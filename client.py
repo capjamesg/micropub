@@ -44,7 +44,7 @@ def index():
                     flash(f"Your {url} post was successfully deleted.")
                 else:
                     flash(http_request.json()["message"].strip("."))
-                return render_template("user/dashboard.html", user=user, me=me, title="Home | Micropub Endpoint", action="delete")
+                return render_template("user/dashboard.html", user=user, me=me, title="Home WriteIt", action="delete")
             elif request.form["action"] == "undelete":
                 if session.get("scopes") and not "undelete" in session.get("scopes").split(" "):
                     flash("You do not have permission to undelete posts.")
@@ -69,7 +69,7 @@ def index():
                     "user/dashboard.html",
                     user=user,
                     me=me,
-                    title="Home | Micropub Endpoint",
+                    title="Home WriteIt",
                     action="undelete"
                 )
 
@@ -82,7 +82,7 @@ def index():
             "user/dashboard.html",
             user=user,
             me=me,
-            title="Dashboard | Micropub Endpoint",
+            title="Dashboard WriteIt",
             action=None
         )
     else:
@@ -90,7 +90,7 @@ def index():
             "index.html",
             user=user,
             me=me,
-            title="Home | Micropub Endpoint",
+            title="Home WriteIt",
             action=None
         )
 
@@ -120,7 +120,7 @@ def create_post():
         post, attribute = item
 
         if post_type == post:
-            title = f"Create a {post.title()} Post | Micropub Endpoint"
+            title = f"Create a {post.title()} Post WriteIt"
             url = request.args.get(attribute)
             request_type = attribute
 
@@ -422,7 +422,7 @@ def settings():
     
     return render_template(
         "user/settings.html",
-        title="Settings | Micropub Endpoint",
+        title="Settings WriteIt",
         user=user,
         me=me,
         syndication=syndication,
@@ -439,7 +439,7 @@ def schemas():
     
     return render_template(
         "user/schemas.html",
-        title="Schemas | Micropub Endpoint",
+        title="Schemas WriteIt",
         user=user,
         me=me
     )

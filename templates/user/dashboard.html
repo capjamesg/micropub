@@ -2,9 +2,9 @@
 {% block content %}
 <section class="main_content_box">
     <section>
-        <h1>James' Micropub Endpoint</h1>
+        <h1>WriteIt</h1>
         {% if action == None %}
-        <p>Welcome to James' Micropub Endpoint.</p>
+        <p>Use the tools below to publish content to your website.</p>
         {% endif %}
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -26,7 +26,6 @@
                 <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
                 <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
                 <li><a href="/post?type=repost">Share a link 🔁</a></li>
-                <li><a href="/post?type=watch">Create a watch post 🎬</a></li>
                 {% if session.get("scopes") and "media" in session.get("scopes").split(" ") %}
                     <li><a href="/post?type=photo">Upload a photo 📷</a></li>
                 {% endif %}

@@ -24,7 +24,9 @@ nav {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin: 10px 0;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-bottom: 10px;
 }
 button, .random_button {
 	background-color: royalblue;
@@ -126,10 +128,6 @@ pre {
 	}
 	.flex_left_home, .flex_right_home {
 		flex: 0 100%;
-	}
-
-	nav li {
-		margin-bottom: 10px;
 	}
 }
 input {
@@ -250,6 +248,26 @@ select {
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 15px;
+}
+/* skip link hiding code from https://www.a11ymatters.com/pattern/skip-link/ */
+.accessibility_label_top {
+    position: fixed;
+    top: -200px;
+}
+.accessibility_label_top:focus {
+	top: 0;
+	left: 50%;
+	padding: 10px;
+}
+.accessibility_label {
+	position: fixed;
+	bottom: -200px;
+}
+.accessibility_label:focus {
+	bottom: 0 !important;
+	left: 50%;
+	padding: 10px;
+	z-index: 1;
 }
 
 a:hover {

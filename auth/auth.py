@@ -53,7 +53,7 @@ def logout():
 def login():
     return render_template(
         "user/auth.html",
-        title="Micropub Dashboard Login"
+        title="WriteIt Login"
     )
 
 @auth.route("/discover", methods=["POST"])
@@ -100,6 +100,6 @@ def discover_auth_endpoint():
     return redirect(
         authorization_endpoint + "?client_id=" +
         CLIENT_ID + "&redirect_uri=" +
-        CALLBACK_URL + "&scope=read follow mute block channels create&response_type=code&code_challenge=" +
+        CALLBACK_URL + "&scope=create update delete undelete media&response_type=code&code_challenge=" +
         code_challenge + "&code_challenge_method=S256&state=" + state
     )
