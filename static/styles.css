@@ -9,7 +9,7 @@ html {
 	font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 main {
-	max-width: 35em;
+	max-width: 50em;;
 	margin: auto;
 	margin-top: 10px;
 }
@@ -43,8 +43,8 @@ button, .random_button {
 }
 nav, footer ul {
 	display: flex;
-	border-top: 5px #FFA500 dashed;
-	border-bottom: 5px #FFA500 dashed;
+	background-color: white;
+	box-shadow: 2px 2px 2px lightgrey;
 }
 nav ul li {
 	display: inline-block;
@@ -155,7 +155,7 @@ details {
 	border: 3px dashed orange;
 	display: block;
 	margin-bottom: 5px;
-	max-width: 35em;
+	max-width: 50em;;
 }
 details span {
 	border: 1px solid lightgray;
@@ -225,7 +225,7 @@ a:focus {
 	border-bottom: 2px dotted black;
 }
 .main_content_box {
-	max-width: 35em;
+	max-width: 50em;;
 	background-color: white;
 	border-radius: 10px;
 	border: 1px solid lightgray;

@@ -1,7 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+
     <title>{% if get_flashed_messages() %}{{ get_flashed_messages()[0] }} - {% endif %}{% if title %}{{ title }}{% else %}WriteIt{% endif %}</title>
 
     <meta name="description" content="WriteIt lets you post content on your website.">
@@ -9,6 +10,8 @@
     <meta name="og:description" content="WriteIt lets you post content on your website.">
   
     <meta name="og:site_name" content="WriteIt">
+
+    <link rel="manifest" href="/manifest.json">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 
@@ -26,9 +29,30 @@
 
     <link rel="apple-touch-icon" sizes="256x256" href="/static/icons/256.png">
 
+    <meta name="apple-touch-fullscreen" content="yes" />
+
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <meta name="apple-mobile-web-app-title" content="Cinnamon">
+
+    <!-- Twitter Card data -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WriteIt">
+
+    <!-- Open Graph data -->
+    <meta property="og:title" content="Cinnamon">
+    <meta property="og:url" content="{{ config.get('URL') }}">
+    <meta property="og:site_name" content="WriteIt">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+
+    <link rel="webmention" href="https://webmention.jamesg.blog/endpoint" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <style id="darkmode" media="none">
       @media (prefers-color-scheme: dark) {

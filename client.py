@@ -244,8 +244,6 @@ def create_post():
                 if check_for_alt_text and request.form.get("image_alt_text"):
                     data["properties"]["photo"][0]["alt"] = request.form.get("image_alt_text")
 
-            print(user, ENDPOINT_URL)
-
             if request.form.get("format") == "form_encoded":
                 form_encoded["h"] = "entry"
                 categories = []
@@ -262,8 +260,6 @@ def create_post():
                 response = http_request.json()["message"]
             except:
                 response = http_request.text
-
-            print(http_request.status_code)
 
             if http_request.status_code != 200 and http_request.status_code != 201:
                 flash("Error: " + str(response))
