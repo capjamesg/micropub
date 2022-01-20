@@ -17,17 +17,16 @@
     {% if user and action == None %}
         <section>
             <h2>Create posts</h2>
-            <p>You can:</p>
-            <ul>
-                <li><a href="/post?type=reply">Reply to a post 💬</a></li>
-                <li><a href="/post?type=like">Like a post ❤️</a></li>
-                <li><a href="/post?type=note">Create a note 📝</a></li>
-                <li><a href="/post?type=rsvp">Create an RSVP 📅</a></li>
-                <li><a href="/post?type=bookmark">Create a bookmark 🔖</a></li>
-                <li><a href="/post?type=checkin">Create a checkin 🌍</a></li>
-                <li><a href="/post?type=repost">Share a link 🔁</a></li>
+            <ul class="action_list">
+                <a href="/post?type=like"><li>Like a post ❤️</li></a>
+                <a href="/post?type=bookmark"><li>Create a bookmark 🔖</li></a>
+                <a href="/post?type=reply"><li>Reply to a post 💬</li></a>
+                <a href="/post?type=note"><li>Create a note 📝</li></a>
+                <a href="/post?type=rsvp"><li>Create an RSVP 📅</li></a>
+                <a href="/post?type=checkin"><li>Create a checkin 🌍</li></a>
+                <a href="/post?type=repost"><li>Share a link 🔁</li></a>
                 {% if session.get("scope") and "media" in session.get("scope").split(" ") %}
-                    <li><a href="/post?type=photo">Upload a photo 📷</a></li>
+                <a href="/post?type=photo"><li>Upload a photo 📷</li></a>
                 {% endif %}
             </ul>
         </section>

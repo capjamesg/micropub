@@ -11,7 +11,6 @@ html {
 main {
 	max-width: 50em;;
 	margin: auto;
-	margin-top: 10px;
 }
 p, code, li {
 	font-size: 1.0625rem;
@@ -227,10 +226,25 @@ a:focus {
 .main_content_box {
 	max-width: 50em;;
 	background-color: white;
-	border-radius: 10px;
 	border: 1px solid lightgray;
 	padding: 20px;
 	margin: auto;
+}
+.action_list {
+	list-style-type: none;
+	padding-left: 0;
+}
+.action_list li {
+	display: inline-block;
+	width: 100%;
+	border: 1px solid lightgrey;
+	margin-bottom: 20px;
+	padding: 10px;
+	box-sizing: border-box;
+	text-align: center;
+}
+.action_list a {
+	border: none;
 }
 input[type="text"]:focus, input[type="radio"]:focus, input[type="url"]:focus, input[type="number"]:focus, textarea:focus, input[type="text"]:focus, input[type="username"]:focus, input[type="password"]:focus {
 	outline: 3px solid royalblue;
