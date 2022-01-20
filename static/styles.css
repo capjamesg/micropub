@@ -40,9 +40,13 @@ button, .random_button {
 .random_button:hover {
 	cursor: pointer;
 }
+.no_underline {
+	border: none;
+}
 nav, footer ul {
 	display: flex;
 	background-color: white;
+	border: 1px solid lightgrey;
 	box-shadow: 2px 2px 2px lightgrey;
 }
 nav ul li {
@@ -238,6 +242,7 @@ a:focus {
 	display: inline-block;
 	width: 100%;
 	border: 1px solid lightgrey;
+	box-shadow: 2px 2px turquoise;
 	margin-bottom: 20px;
 	padding: 10px;
 	box-sizing: border-box;

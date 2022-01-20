@@ -215,18 +215,23 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         else:
             json_content["sitemap"] = "true"
 
-    if json_content.get("syndication") and "twitter" in json_content["syndication"]:
-        twitter_syndication_string = """
-        \n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p>
-        <a href='https://brid.gy/publish/twitter'></a>
-        """
+    # only allow twitter syndication if reply is in reply to a tweet
+    if not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith("https://twitter.com") and \
+        not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith("http://twitter.com"):
+        if json_content.get("syndication") and "twitter" in json_content["syndication"]:
+            twitter_syndication_string = """
+            \n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p>
+            <a href='https://brid.gy/publish/twitter'></a>
+            """
 
-        content = content + twitter_syndication_string
+            content = content + twitter_syndication_string
 
     # add brid.gy fed link so posts can be syndicated to the fediverse
     # do this for all posts for now
     # if json_content.get("syndication") and "fediverse" in json_content["syndication"]:
-    content = content + "\n<a href='https://fed.brid.gy/'></a>"
+    # only syndicate to fediverse if a post is a Note
+    if "Note" in json_content.get("category", []):
+        content = content + "\n<a href='https://fed.brid.gy/'></a>"
     
     json_content["posted_using"] = "my Micropub server"
     json_content["posted_using_url"] = "https://github.com/capjamesg/micropub"

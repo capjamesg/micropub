@@ -56,7 +56,7 @@
 
     <style id="darkmode" media="none">
       @media (prefers-color-scheme: dark) {
-        html, .feed li, aside, .content_box, .main_content_box, .green_notification, .modal_content {
+        html, .feed li, aside, .content_box, .main_content_box, nav, .green_notification, .modal_content {
           background-color: #1F2937;
           background: #1F2937 !important;
         }
@@ -88,7 +88,7 @@
       <a href="#main" class="accessibility_label_top">Skip to main content</a>
       {% if url_for(request.endpoint) != "/editor" %}
         <nav id="top_navigation">
-          <p><a href="/">WriteIt</a></p>
+          <a href="/" class="no_underline"><img src="/static/icons/40.png" height="40" width="40" alt="WriteIt Home" /></a>
           {% if user %}
           <ul>
             <li><a href="/settings">👤 {{ me.split("/")[2] }}</a></li>
