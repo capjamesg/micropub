@@ -108,6 +108,8 @@ Here are some relevant resources that you might find useful if you are intereste
 
 The emojis.json file that the automatic emoji detection system uses on the /post page was retrieved from [this Gist](https://gist.github.com/harplife/c5fb201e95c9427d976d7bac37ab1e32) by [harplife](https://github.com/harplife/).
 
+The supported TLDs list used for automatic linking is from the [iana.org TLDs list](https://data.iana.org/TLD/tlds-alpha-by-domain.txt).
+
 ## Contributors
 
 - capjamesg

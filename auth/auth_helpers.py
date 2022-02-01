@@ -1,23 +1,26 @@
-from flask import request, session, abort
 import requests
+from flask import abort, request, session
+
 
 def validate_scope(scope, granted_scope_list):
     if scope not in granted_scope_list:
         abort(403)
 
+
 def get_access_token(request):
-    access_token = request.headers.get('Authorization')
+    access_token = request.headers.get("Authorization")
 
     if access_token:
-      access_token = access_token.replace('Bearer ', '')
+        access_token = access_token.replace("Bearer ", "")
     if not access_token:
-      access_token = request.form.get('access_token')
+        access_token = request.form.get("access_token")
     if not access_token:
-      access_token = session.get("access_token")
+        access_token = session.get("access_token")
     if not access_token:
         access_token = None
 
     return access_token
+
 
 def verify_user(request):
     access_token = get_access_token(request)
@@ -26,7 +29,7 @@ def verify_user(request):
 
     r = requests.get(
         "https://auth.jamesg.blog/token",
-        headers={'Authorization': 'Bearer ' + access_token}
+        headers={"Authorization": "Bearer " + access_token},
     )
     if r.status_code == 200:
         return True, []
@@ -39,6 +42,6 @@ def verify_user(request):
     if not json_response.get("access_token") or json_response.get("access_token") == "":
         return False
 
-    scopes = r.json().get('scope', '').split(' ')
+    scopes = r.json().get("scope", "").split(" ")
 
     return False, scopes

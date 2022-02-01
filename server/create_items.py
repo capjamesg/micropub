@@ -1,30 +1,35 @@
-import os
-import string
-import random
 import datetime
-
-from flask import jsonify
-from werkzeug.utils import secure_filename
-from bs4 import BeautifulSoup
-import indieweb_utils
-from github import Github
 import mimetypes
+import os
+import random
+import string
+
+import indieweb_utils
 import requests
 import yaml
+from bs4 import BeautifulSoup
+from flask import jsonify
+from github import Github
+from werkzeug.utils import secure_filename
 
-from config import GITHUB_KEY, HOME_FOLDER, GOOGLE_API_KEY, TWITTER_BEARER_TOKEN
+from config import (GITHUB_KEY, GOOGLE_API_KEY, HOME_FOLDER,
+                    TWITTER_BEARER_TOKEN)
+
 from . import micropub_helper
 
 g = Github(GITHUB_KEY)
-            
+
+
 def save_file_from_context(url):
     photo_request = requests.get(url)
 
     file_name = None
 
     if photo_request.status_code == 200:
-        fifteen_random_letters = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
-        
+        fifteen_random_letters = "".join(
+            random.choice(string.ascii_uppercase + string.digits) for _ in range(15)
+        )
+
         mime_type = mimetypes.guess_type(url)
 
         if mime_type[0] is not None:
@@ -37,9 +42,15 @@ def save_file_from_context(url):
             with open(HOME_FOLDER + f"{file_name}", "wb") as file:
                 file.write(photo_request.content)
 
-            repo.create_file("assets/" + file_name, "create image for micropub client", photo_request.content, branch="main")
+            repo.create_file(
+                "assets/" + file_name,
+                "create image for micropub client",
+                photo_request.content,
+                branch="main",
+            )
 
     return file_name
+
 
 def process_social(repo, front_matter, interaction, content=None):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -48,8 +59,6 @@ def process_social(repo, front_matter, interaction, content=None):
 
     if json_content.get(interaction.get("attribute")):
         target = json_content.get(interaction.get("attribute"))[0]
-
-        print(target)
 
         if target.get("bookmark-of"):
             target = target.get("bookmark-of")
@@ -62,7 +71,11 @@ def process_social(repo, front_matter, interaction, content=None):
     else:
         target = None
 
-    if target and isinstance(target, str) and (target.startswith("https://") or target.startswith("http://")):
+    if (
+        target
+        and isinstance(target, str)
+        and (target.startswith("https://") or target.startswith("http://"))
+    ):
         title_req = requests.get(target)
 
         soup = BeautifulSoup(title_req.text, "lxml")
@@ -73,7 +86,9 @@ def process_social(repo, front_matter, interaction, content=None):
             title = target.replace("https://", "").replace("http://", "")
 
     if target:
-        h_entry, _ = indieweb_utils.get_reply_context(target, twitter_bearer_token=TWITTER_BEARER_TOKEN)
+        site_supports_webmention, h_entry, _ = indieweb_utils.get_reply_context(
+            target, twitter_bearer_token=TWITTER_BEARER_TOKEN
+        )
 
         if h_entry:
             json_content["context"] = h_entry
@@ -105,7 +120,7 @@ def process_social(repo, front_matter, interaction, content=None):
 
     # with open(HOME_FOLDER + f"random-{random_sequence}.txt", "w+") as f:
     #     f.write(content)
-    
+
     # if "<pre lang='python'>" in content:
     #     with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
     #         content = colors.get_rendered_html(f.read(), "python")
@@ -115,14 +130,18 @@ def process_social(repo, front_matter, interaction, content=None):
 
     # os.remove(HOME_FOLDER + f"random-{random_sequence}.txt")
 
-    return write_to_file(
-        front_matter,
-        content,
-        repo,
-        title,
-        interaction.get("folder"),
-        category=interaction.get("category")
-    ), 201
+    return (
+        write_to_file(
+            front_matter,
+            content,
+            repo,
+            title,
+            interaction.get("folder"),
+            category=interaction.get("category"),
+        ),
+        201,
+    )
+
 
 def process_checkin(repo, front_matter, content):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
@@ -131,21 +150,37 @@ def process_checkin(repo, front_matter, content):
 
     source = None
 
-    if json_content.get("syndication") and isinstance(json_content.get("syndication"), list) and \
-        json_content.get("syndication")[0].startswith("https://www.swarmapp.com"):
+    if (
+        json_content.get("syndication")
+        and isinstance(json_content.get("syndication"), list)
+        and json_content.get("syndication")[0].startswith("https://www.swarmapp.com")
+    ):
         source = "swarm"
 
     if source != "swarm":
-        if not json_content.get("name")[0] or not json_content.get("latitude") or not json_content.get("longitude"):
-            return jsonify({"message": "Please enter a venue name, latitude, and longitude."}), 400
+        if (
+            not json_content.get("name")[0]
+            or not json_content.get("latitude")
+            or not json_content.get("longitude")
+        ):
+            return (
+                jsonify(
+                    {"message": "Please enter a venue name, latitude, and longitude."}
+                ),
+                400,
+            )
 
-        if not json_content.get("street_address") or not json_content.get("locality") \
-            or not json_content.get("region") or not json_content.get("country_name"):
+        if (
+            not json_content.get("street_address")
+            or not json_content.get("locality")
+            or not json_content.get("region")
+            or not json_content.get("country_name")
+        ):
 
             url_params = f"latlng={json_content.get('latitude')},{json_content.get('longitude')}&key={GOOGLE_API_KEY}"
 
             url = f"https://maps.googleapis.com/maps/api/geocode/json?{url_params}"
-            
+
             r = requests.get(url)
 
             if r.status_code == 200:
@@ -156,22 +191,32 @@ def process_checkin(repo, front_matter, content):
 
                     if not json_content.get("street_address"):
                         json_content["street_address"] = results["formatted_address"]
-                    
+
                     if not json_content.get("locality"):
-                        json_content["locality"] = results["address_components"][2]["long_name"]
-                    
+                        json_content["locality"] = results["address_components"][2][
+                            "long_name"
+                        ]
+
                     if not json_content.get("region"):
-                        json_content["region"] = results["address_components"][4]["long_name"]
+                        json_content["region"] = results["address_components"][4][
+                            "long_name"
+                        ]
 
                     if not json_content.get("country_name"):
-                        json_content["country_name"] = results["address_components"][-2]["long_name"]
+                        json_content["country_name"] = results["address_components"][
+                            -2
+                        ]["long_name"]
 
-        slug = json_content.get("name")[0] \
-            .replace(" ", "-") \
-            .replace(".", "-") \
-            .replace("-", "") \
-            .replace(",", "") \
-            .lower() + "-" + "".join(random.sample(string.ascii_letters, 3))
+        slug = (
+            json_content.get("name")[0]
+            .replace(" ", "-")
+            .replace(".", "-")
+            .replace("-", "")
+            .replace(",", "")
+            .lower()
+            + "-"
+            + "".join(random.sample(string.ascii_letters, 3))
+        )
 
         if not content:
             content = f"Checked in to {json_content.get('name')[0].replace(':', '')}."
@@ -190,9 +235,23 @@ def process_checkin(repo, front_matter, content):
 
     front_matter = yaml.dump(json_content)
 
-    return write_to_file(front_matter, content, repo, title, "_checkin", slug=slug, category="Checkin"), 201
+    return (
+        write_to_file(
+            front_matter,
+            content,
+            repo,
+            title,
+            "_checkin",
+            slug=slug,
+            category="Checkin",
+        ),
+        201,
+    )
 
-def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None, category=None):
+
+def write_to_file(
+    front_matter, content, repo, post_name, folder_name, slug=None, category=None
+):
     json_content = yaml.load(front_matter, Loader=yaml.SafeLoader)
 
     if not json_content.get("layout"):
@@ -215,16 +274,54 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
         else:
             json_content["sitemap"] = "true"
 
-    # only allow twitter syndication if reply is in reply to a tweet
-    if not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith("https://twitter.com") and \
-        not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith("http://twitter.com"):
-        if json_content.get("syndication") and "twitter" in json_content["syndication"]:
-            twitter_syndication_string = """
-            \n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p>
-            <a href='https://brid.gy/publish/twitter'></a>
-            """
+    # add auto links
+    if json_content.get("content"):
+        post_contents = json_content["content"]
 
-            content = content + twitter_syndication_string
+        with open("accepted_tlds.txt", "r") as f:
+            accepted_tlds = f.read().split("\n")
+
+        for word in post_contents.split(" "):
+            if word.startswith("https://") or word.startswith("http://"):
+                post_contents = post_contents.replace(
+                    word, "<a href='https://{}'>{}</a>".format(word, word)
+                )
+
+            if "." in word:
+                potential_tld = word.split(".")[-1].upper()
+
+                if accepted_tlds.get(potential_tld):
+                    post_contents = post_contents.replace(
+                        word, "<a href='https://{}'>{}</a>".format(word, word)
+                    )
+
+            if word.startswith("#"):
+                post_contents = post_contents.replace(
+                    word,
+                    "<a href='https://jamesg.blog/tag/{}'>{}</a>".format(
+                        word[1:], word
+                    ),
+                )
+
+        json_content["content"] = post_contents
+
+    # only allow twitter syndication if reply is in reply to a tweet
+    if not json_content.get("in-reply-to", {}):
+        if not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith(
+            "https://twitter.com"
+        ) and not json_content.get("in-reply-to", {}).get("in-reply-to", "").startswith(
+            "http://twitter.com"
+        ):
+            if (
+                json_content.get("syndication")
+                and "twitter" in json_content["syndication"]
+            ):
+                twitter_syndication_string = """
+                \n <p>This post was syndicated to <a href='https://twitter.com/capjamesg'>Twitter</a>.</p>
+                <a href='https://brid.gy/publish/twitter'></a>
+                """
+
+                content = content + twitter_syndication_string
 
     # add brid.gy fed link so posts can be syndicated to the fediverse
     # do this for all posts for now
@@ -232,13 +329,17 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
     # only syndicate to fediverse if a post is a Note
     if "Note" in json_content.get("category", []):
         content = content + "\n<a href='https://fed.brid.gy/'></a>"
-    
+
     json_content["posted_using"] = "my Micropub server"
     json_content["posted_using_url"] = "https://github.com/capjamesg/micropub"
 
     front_matter = yaml.dump(json_content)
-    
-    slug = datetime.datetime.now().strftime("%Y-%m-%d") + "-" + str(random.randint(100, 999))
+
+    slug = (
+        datetime.datetime.now().strftime("%Y-%m-%d")
+        + "-"
+        + str(random.randint(100, 999))
+    )
 
     with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "w+") as file:
         file.write("---\n")
@@ -251,13 +352,16 @@ def write_to_file(front_matter, content, repo, post_name, folder_name, slug=None
             f"{folder_name}/" + slug + ".md",
             "create post from micropub client",
             file.read(),
-            branch="main"
+            branch="main",
         )
 
     resp = jsonify({"message": "Created"})
-    resp.headers["Location"] = f"https://jamesg.blog/{folder_name.replace('_', '')}/{slug}"
+    resp.headers[
+        "Location"
+    ] = f"https://jamesg.blog/{folder_name.replace('_', '')}/{slug}"
 
     return resp
+
 
 def undelete_post(repo, url):
     repo = g.get_repo("capjamesg/jamesg.blog")
@@ -267,18 +371,22 @@ def undelete_post(repo, url):
     url = secure_filename(url)
 
     contents, _, folder = micropub_helper.check_if_exists(url, repo, get_contents=False)
-    
+
     if contents is None and folder is None:
-        return jsonify({"message": "The post you tried to undelete does not exist."}), 404
-    
+        return (
+            jsonify({"message": "The post you tried to undelete does not exist."}),
+            404,
+        )
+
     repo.create_file(
         folder + "/" + url + ".md",
         "undelete post from micropub server",
         contents,
-        branch="main"
+        branch="main",
     )
 
     return jsonify({"message": "Post undeleted."}), 200
+
 
 def delete_post(repo, url):
     repo = g.get_repo("capjamesg/jamesg.blog")
@@ -291,15 +399,21 @@ def delete_post(repo, url):
     url = secure_filename(url)
 
     contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo)
-    
+
     if contents is None and repo_file_contents is None and folder is None:
-        return jsonify({"message": "The post you tried to undelete does not exist."}), 404
+        return (
+            jsonify({"message": "The post you tried to undelete does not exist."}),
+            404,
+        )
 
     contents = repo.get_contents(folder + "/" + url + ".md")
-    
-    repo.delete_file(contents.path, "remove post via micropub", contents.sha, branch="main")
+
+    repo.delete_file(
+        contents.path, "remove post via micropub", contents.sha, branch="main"
+    )
 
     return jsonify({"message": "Post deleted."}), 200
+
 
 def update_post(repo, url, front_matter, full_contents_for_writing):
     repo = g.get_repo("capjamesg/jamesg.blog")
@@ -311,13 +425,17 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
 
     url = url.split("/")[-1]
 
-    char_comprehension = [char for char in url if char.isalnum() or char == " " or char == "-" or char == "_"]
+    char_comprehension = [
+        char
+        for char in url
+        if char.isalnum() or char == " " or char == "-" or char == "_"
+    ]
 
     url = "".join(char_comprehension).lower()
     url = url.replace(" ", "-")
 
     contents, repo_file_contents, folder = micropub_helper.check_if_exists(url, repo)
-    
+
     if contents is None and repo_file_contents is None and folder is None:
         return jsonify({"message": "Post not found."}), 404
 
@@ -333,17 +451,23 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
     if yaml.load(front_matter).get("replace"):
         if not isinstance(yaml.load(front_matter).get("replace"), list):
             return jsonify({"message": "This is not a valid update request."}), 400
-        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["replace"]
+        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)[
+            "replace"
+        ]
 
         for k in user_front_matter_to_json:
             if k in yaml_to_json.keys():
                 yaml_to_json[k] = user_front_matter_to_json[k][0]
 
     if yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"):
-        if not isinstance(yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"), list):
+        if not isinstance(
+            yaml.load(front_matter, Loader=yaml.SafeLoader).get("add"), list
+        ):
             return jsonify({"message": "This is not a valid add request."}), 400
-            
-        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["add"]
+
+        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)[
+            "add"
+        ]
 
         for k in user_front_matter_to_json:
             if k in yaml_to_json.keys() and k is not None:
@@ -355,9 +479,13 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
                 yaml_to_json[k] = user_front_matter_to_json[k]
 
     if yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"):
-        if not isinstance(yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"), list):
+        if not isinstance(
+            yaml.load(front_matter, Loader=yaml.SafeLoader).get("delete"), list
+        ):
             return jsonify({"message": "This is not a valid delete request."}), 400
-        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)["delete"]
+        user_front_matter_to_json = yaml.load(front_matter, Loader=yaml.SafeLoader)[
+            "delete"
+        ]
 
         if isinstance(user_front_matter_to_json) == dict:
             for k in user_front_matter_to_json:
@@ -382,7 +510,7 @@ def update_post(repo, url, front_matter, full_contents_for_writing):
             "update post via micropub",
             file.read(),
             repo_file_contents.sha,
-            branch="main"
+            branch="main",
         )
 
     resp = jsonify({"message": "Post updated."})
