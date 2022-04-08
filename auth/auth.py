@@ -5,6 +5,7 @@ import string
 
 from flask import Blueprint, flash, redirect, render_template, request, session
 from indieweb_utils import discover_endpoints, indieauth_callback_handler
+import indieweb_utils
 
 from config import CALLBACK_URL, CLIENT_ID, ME
 
@@ -31,7 +32,7 @@ def indieauth_callback():
         required_scopes,
     )
 
-    if message != None:
+    if message is not None:
         flash(message)
         return redirect("/login")
 
@@ -70,7 +71,7 @@ def discover_auth_endpoint():
         "microsub",
     ]
 
-    headers = discover_endpoints(domain, headers_to_find)
+    headers = indieweb_utils.webmentions.discovery._discover_endpoints(domain, headers_to_find)
 
     if not headers.get("authorization_endpoint"):
         flash(

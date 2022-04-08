@@ -23,60 +23,61 @@ def index():
         me = None
 
     if request.method == "POST":
-        if user:
-            url = request.form["url"]
-            if request.form["action"] == "update":
-                return redirect(f"/update?url={url}")
-            elif request.form["action"] == "delete":
-                if session.get("scope") and not "delete" in session.get("scope").split(
-                    " "
-                ):
-                    flash("You do not have permission to update posts.")
-                    return redirect("/")
+        if not user:
+            abort(403)
 
-                http_request = requests.post(
-                    ENDPOINT_URL,
-                    json={"type": ["h-entry"], "action": "delete", "url": url},
-                    headers={"Authorization": f"Bearer {user}"},
-                )
-                if http_request.status_code == 200 or http_request.status_code == 201:
-                    flash(f"Your {url} post was successfully deleted.")
-                else:
-                    flash(http_request.json()["message"].strip("."))
-                return render_template(
-                    "user/dashboard.html",
-                    user=user,
-                    me=me,
-                    title="WriteIt Home",
-                    action="delete",
-                )
-            elif request.form["action"] == "undelete":
-                if session.get("scope") and not "undelete" in session.get(
-                    "scope"
-                ).split(" "):
-                    flash("You do not have permission to undelete posts.")
-                    return redirect("/")
+        url = request.form["url"]
 
-                http_request = requests.post(
-                    ENDPOINT_URL,
-                    json={"type": ["h-entry"], "action": "undelete", "url": url},
-                    headers={"Authorization": f"Bearer {user}"},
-                )
-                if http_request.status_code == 200 or http_request.status_code == 201:
-                    flash(f"Your {url} post was successfully undeleted.")
-                else:
-                    flash(http_request.json()["message"].strip("."))
-                return render_template(
-                    "user/dashboard.html",
-                    user=user,
-                    me=me,
-                    title="WriteIt Home",
-                    action="undelete",
-                )
+        if request.form["action"] == "update":
+            return redirect(f"/update?url={url}")
+        elif request.form["action"] == "delete":
+            if session.get("scope") and not "delete" in session.get("scope").split(
+                " "
+            ):
+                flash("You do not have permission to update posts.")
+                return redirect("/")
 
-            return redirect("/")
+            http_request = requests.post(
+                ENDPOINT_URL,
+                json={"type": ["h-entry"], "action": "delete", "url": url},
+                headers={"Authorization": f"Bearer {user}"},
+            )
+            if http_request.status_code == 200 or http_request.status_code == 201:
+                flash(f"Your {url} post was successfully deleted.")
+            else:
+                flash(http_request.json()["message"].strip("."))
+            return render_template(
+                "user/dashboard.html",
+                user=user,
+                me=me,
+                title="WriteIt Home",
+                action="delete",
+            )
+        elif request.form["action"] == "undelete":
+            if session.get("scope") and not "undelete" in session.get(
+                "scope"
+            ).split(" "):
+                flash("You do not have permission to undelete posts.")
+                return redirect("/")
 
-        abort(403)
+            http_request = requests.post(
+                ENDPOINT_URL,
+                json={"type": ["h-entry"], "action": "undelete", "url": url},
+                headers={"Authorization": f"Bearer {user}"},
+            )
+            if http_request.status_code == 200 or http_request.status_code == 201:
+                flash(f"Your {url} post was successfully undeleted.")
+            else:
+                flash(http_request.json()["message"].strip("."))
+            return render_template(
+                "user/dashboard.html",
+                user=user,
+                me=me,
+                title="WriteIt Home",
+                action="undelete",
+            )
+
+        return redirect("/")
 
     if user is not None:
         return render_template(
@@ -102,8 +103,6 @@ def create_post():
 
     post_type = request.args.get("type")
 
-    request_type = None
-
     accepted_post_types = (
         ("like", "like-of"),
         ("repost", "repost-of"),
@@ -122,7 +121,6 @@ def create_post():
         if post_type == post:
             title = f"Create a {post.title()} Post"
             url = request.args.get(attribute)
-            request_type = attribute
 
     if post_type == "photo" and "media" not in session.get("scope").split(" "):
         flash("You need to grant the 'media' scope to upload photos.")
@@ -169,7 +167,6 @@ def create_post():
 
                     data["properties"][key] = [form_encoded]
                     url = form_encoded[key]
-                    request_type = key
                     break
 
             if (
@@ -332,11 +329,16 @@ def create_post():
 
         return jsonify({"error": "You must be logged in to create a post."}), 401
 
-    if request_type is not None and url:
-        site_supports_webmention, h_entry, _ = indieweb_utils.get_reply_context(
+    try:
+        reply_context_response = indieweb_utils.get_reply_context(
             url, twitter_bearer_token=TWITTER_BEARER_TOKEN
         )
-    else:
+
+        h_entry = reply_context_response
+
+        if reply_context_response.webmention_endpoint != "":
+            site_supports_webmention = True
+    except Exception:
         h_entry = None
         site_supports_webmention = False
 

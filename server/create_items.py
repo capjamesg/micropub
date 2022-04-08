@@ -86,23 +86,25 @@ def process_social(repo, front_matter, interaction, content=None):
             title = target.replace("https://", "").replace("http://", "")
 
     if target:
-        site_supports_webmention, h_entry, _ = indieweb_utils.get_reply_context(
-            target, twitter_bearer_token=TWITTER_BEARER_TOKEN
-        )
+        try:
+            reply_context_response = indieweb_utils.get_reply_context(
+                target, twitter_bearer_token=TWITTER_BEARER_TOKEN
+            )
 
-        if h_entry:
-            json_content["context"] = h_entry
+            json_content["context"] = reply_context_response
+        except Exception:
+            pass
 
         # if h_entry.get("author") and h_entry["author"].get("photo"):
         #     file_name = save_file_from_context(h_entry["author"]["photo"])
 
-        #     if file_name != None:
+        #     if file_name is not None:
         #         h_entry["author"]["photo"] = f"/assets/{file_name}"
 
         # if h_entry.get("post_photo_url"):
         #     file_name = save_file_from_context(h_entry["post_photo_url"])
 
-        #     if file_name != None:
+        #     if file_name is not None:
         #         h_entry["author"]["photo"] = f"/assets/{file_name}"
 
         # save target url to wayback machine
@@ -115,20 +117,6 @@ def process_social(repo, front_matter, interaction, content=None):
         title = f"{interaction.get('keyword').title()}"
 
     front_matter = yaml.dump(json_content)
-
-    # random_sequence = "".join(random.sample(string.ascii_letters, 3))
-
-    # with open(HOME_FOLDER + f"random-{random_sequence}.txt", "w+") as f:
-    #     f.write(content)
-
-    # if "<pre lang='python'>" in content:
-    #     with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
-    #         content = colors.get_rendered_html(f.read(), "python")
-    # elif "<pre lang='bash'>" in content:
-    #     with open(HOME_FOLDER + f"random-{random_sequence}.txt", "r") as f:
-    #         content = colors.get_rendered_html(f.read(), "bash")
-
-    # os.remove(HOME_FOLDER + f"random-{random_sequence}.txt")
 
     return (
         write_to_file(
@@ -303,6 +291,9 @@ def write_to_file(
                     ),
                 )
 
+                with open("hashtags.txt", "a") as f:
+                    f.write(word[1:] + "\n")
+
         json_content["content"] = post_contents
 
     # only allow twitter syndication if reply is in reply to a tweet
@@ -346,6 +337,9 @@ def write_to_file(
         file.write(front_matter)
         file.write("---\n")
         file.write(content)
+
+    if json_content.get("is_private", False):
+        folder_name = f"/private/post/{folder_name}"
 
     with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "r") as file:
         repo.create_file(

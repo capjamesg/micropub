@@ -1,4 +1,5 @@
 import os
+import json
 import random
 import string
 
@@ -251,6 +252,18 @@ def micropub_endpoint():
     if request.args.get("q") and request.args.get("q") == "syndicate-to":
         response = {"syndicate-to": []}
         return jsonify(response)
+
+    if request.args.get("q") and request.args.get("q") == "contacts":
+        with open("person_tags.json", "r") as f:
+            contacts = json.load(f)
+
+        return jsonify({"contacts": contacts})
+
+    if request.args.get("q") and request.args.get("q") == "category":
+        with open("hashtags.txt", "r") as f:
+            categories = f.read().split("\n")
+
+        return jsonify({"categories": categories})
 
     if (
         request.args.get("q")
