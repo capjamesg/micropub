@@ -15,8 +15,6 @@ client = Blueprint("client", __name__, static_folder="static", static_url_path="
 
 @client.route("/", methods=["GET", "POST"])
 def index():
-    session["me"] = "s"
-    session["access_token"] = "s"
     if session.get("access_token"):
         user = session["access_token"]
         me = session["me"]
