@@ -22,8 +22,6 @@
     <h1>Create a note 📝</h1>
     <p>Use the form below to create a note on your personal website.</p>
     <form action="/post" method="POST" enctype="multipart/form-data">
-        <label for="title">Post title (optional):</label><br>
-        <input type="text" name="title" id="title" placeholder="Coffee is great, isn't it?" /><br>
         <label for="content">Post contents:</label><br>
         <textarea name="content" id="content" rows="20" required></textarea><br>
         <p>Characters used: <span id="character_count">0</span> (240 is maximum for a Tweet)</p>
@@ -36,15 +34,10 @@
         {% endif %}
         <label for="category">Post category:</label><br>
         <input type="text" name="category" id="category" placeholder="Note, Coffee..." required /><br>
-        <label for="is_hidden">Should this note be hidden?</label><br>
-        <input type="radio" name="is_hidden" value="yes" checked>yes</input><br>
-        <input type="radio" name="is_hidden" value="no">no</input><br>
+        <label for="private">Should this note be hidden?</label><br>
+        <input type="radio" name="private" value="true" checked>yes</input><br>
+        <input type="radio" name="private" value="false">no</input><br>
         {% include "includes/reply_emojis.html" %}
-        <label for="syndication">Select a syndication platform below if you wish to publish your post elsewhere too.</label><br>
-        <select name="syndication" id="syndication">
-            <option value="none">None</option>
-            <option value="twitter">Twitter</option>
-        </select><br>
         <input type="hidden" value="{{ user }}" name="access_token" id="access_token" required />
         <input type="hidden" name="h" id="h" value="entry" required />
         <input type="hidden" name="action" id="action" value="create" required />

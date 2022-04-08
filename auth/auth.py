@@ -4,7 +4,6 @@ import random
 import string
 
 from flask import Blueprint, flash, redirect, render_template, request, session
-from indieweb_utils import discover_endpoints, indieauth_callback_handler
 import indieweb_utils
 
 from config import CALLBACK_URL, CLIENT_ID, ME
@@ -20,7 +19,7 @@ def indieauth_callback():
     # these are the scopes necessary for the application to run
     required_scopes = ["create"]
 
-    message, response = indieauth_callback_handler(
+    message, response = indieweb_utils.indieauth.indieauth_callback_handler(
         code,
         state,
         session.get("token_endpoint"),

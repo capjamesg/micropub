@@ -7,7 +7,7 @@
     <div class="e-content webmention-content flex_right_home">
         <h3>{% if h_entry.name %}{{ h_entry.name }}{% endif %}</h3>
         {% if h_entry.photo %}
-            <img src="{{ h_entry.photo }}" alt="{{ h_entry.name ) }} header photo" style="width: 100%;">
+            <img src="{{ h_entry.photo }}" alt="{{ h_entry.name }} header photo" style="width: 100%;">
         {% endif %}
         <p>{{ " ".join(h_entry.post_text.split(" ")[:75]) }}{% if h_entry.post_text.split(" ") | length > 75 %}...{% endif %}</p>
         <p><a href="{{ url }}">View post</a></p>
@@ -18,7 +18,7 @@
 </section>
 {% elif h_entry and h_entry.name %}
 <section class="context">
-    <h3>{% if h_entry.name %}{{ h_entry.na,e }}{% endif %}</h3>
+    <h3>{% if h_entry.name %}{{ h_entry.name }}{% endif %}</h3>
     {% if h_entry.photo %}
         <img src="{{ h_entry.photo }}" alt="{{ h_entry.name }} header photo" style="width: 100%;">
     {% endif %}

@@ -332,14 +332,14 @@ def write_to_file(
         + str(random.randint(100, 999))
     )
 
+    if json_content.get("private", [])[0] == "true":
+        folder_name = f"private/post/{folder_name}"
+
     with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "w+") as file:
         file.write("---\n")
         file.write(front_matter)
         file.write("---\n")
         file.write(content)
-
-    if json_content.get("is_private", False):
-        folder_name = f"/private/post/{folder_name}"
 
     with open(HOME_FOLDER + f"{folder_name}/{slug}.md", "r") as file:
         repo.create_file(

@@ -15,6 +15,8 @@ client = Blueprint("client", __name__, static_folder="static", static_url_path="
 
 @client.route("/", methods=["GET", "POST"])
 def index():
+    session["me"] = "s"
+    session["access_token"] = "s"
     if session.get("access_token"):
         user = session["access_token"]
         me = session["me"]
@@ -114,6 +116,9 @@ def create_post():
         ("photo", ""),
         ("watch", ""),
     )
+
+    title = ""
+    url = ""
 
     for item in accepted_post_types:
         post, attribute = item
@@ -229,8 +234,8 @@ def create_post():
                     data["properties"]["category"] = request.form.get("category").split(
                         ", "
                     )
-                if request.form.get("is_hidden"):
-                    data["properties"]["is_hidden"] = [request.form.get("is_hidden")]
+                if request.form.get("private"):
+                    data["properties"]["private"] = [request.form.get("private")]
                 if (
                     request.form.get("content")
                     and BeautifulSoup(request.form.get("content"), "lxml")
