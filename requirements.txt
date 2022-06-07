@@ -17,7 +17,7 @@ mf2py==1.1.2
 Pillow==9.0.1
 pycparser==2.20
 PyGithub==1.55
-PyJWT==2.3.0
+PyJWT==2.4.0
 PyNaCl==1.4.0
 PyYAML==6.0
 requests==2.26.0
