@@ -23,7 +23,7 @@ PyYAML==6.0
 requests==2.31.0
 six==1.16.0
 soupsieve==2.2.1
-urllib3==1.26.17
+urllib3==1.26.18
 webencodings==0.5.1
 Werkzeug==2.2.3
 wrapt==1.13.3
