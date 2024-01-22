@@ -14,7 +14,7 @@ itsdangerous==2.0.1
 Jinja2==3.0.2
 MarkupSafe==2.0.1
 mf2py==1.1.2
-Pillow==10.0.1
+Pillow==10.2.0
 pycparser==2.20
 PyGithub==1.55
 PyJWT==2.4.0
